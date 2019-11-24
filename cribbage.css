@@ -7,30 +7,10 @@ body {
   --red-color : #F03A17;
 }
 
-#playGame {
-  padding: 0;
-}
-
 #startGame {
   width:100%;
   text-align:center;
   padding-top:25px;
-}
-
-/**** Opening Screen ****/
-#lastGame {
-  font-size: 24px;
-}
-
-span.last {
-  padding: 5px;
-  width: 100px;
-  display:inline-block;
-  color:white;
-}
-
-.big {
-  font-size:48px;
 }
 
 .redbg {
@@ -41,6 +21,22 @@ span.last {
   background-color:var(--blue-color);
 }
 
+/**** Opening Screen ****/
+#lastGame {
+  font-size: 24px;
+}
+
+.last {
+  padding: 5px;
+  width: 100px;
+  display:inline-block;
+  color:white;
+}
+
+.big {
+  font-size:48px;
+}
+
 /**** General Controls ****/
 
 button {
@@ -48,7 +44,6 @@ button {
   border-style:solid;
   width:120px;
   height:100%;
-  shadow:0px;
   border-width:0px;
   color:white;
   background-color:#666666;
@@ -81,7 +76,7 @@ button:focus {
 
 /**** Full Screen Stuff ****/
 
-.full-screen {
+.fullscreen {
   position:absolute;
   right:5px;
   top:5px;
@@ -93,19 +88,19 @@ button:focus {
   height: 1em;
   font-size:40px;
 }
-.full-screen:before, .full-screen:after {
+.fullscreen:before, .fullscreen:after {
   content: '';
   background: white;
   position: absolute;
 }
-.full-screen:before {
+.fullscreen:before {
   width: .333em;
   height: 1em;
   left: .233em;
   top: -.1em;
 }
 
-.full-screen:after {
+.fullscreen:after {
   width: 1em;
   height: .333em;
   top: .233em;
@@ -114,6 +109,7 @@ button:focus {
 
 
 /**** Individual UI Elements ****/
+
 /**** Scoring Buttons ****/
 
 button#handCribButton {
@@ -126,170 +122,11 @@ button#handCribButton {
   width:100%;
 }
 
-#bigslider {
-  position:relative;
-  font-size:48px;
-  padding-left:20px;
-  padding-right:20px;
-  width:80px;
-  height:100%;
-  border:5px solid black;
-  border-radius:10px;
-  top:5px;
-}
-
 .scoreButtons {
   position:absolute;
   left:170px;
   height:60%;
   top:0;
-}
-
-/**** Scoreboard ****/
-
-div.scoreContainer {
-  display:inline-block;
-}
-
-#scoreboard {
-  width:100%;
-  margin-bottom:10px;
-}
-
-.subtotals {
-  position:absolute;
-  display:inline-block;
-  font-size:14px;
-  right:3px;
-  top: 50%;
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);  
-  
-}
-
-.subtotallabels {
-    font-size:12px;
-}
-
-.subtotal {
-}
-
-td {
-  text-align:center;
-}
-
-.total {
-  font-size:48px;
-  display:inline-block;
-  color:white;
-  width:65px;
-  text-align:center;
-}
-
-#top {
-  position:relative;
-  height:161px;
-}
-
-#pegcontainer {
-    position:absolute;
-    top:0px;
-    right:100px;
-    left:20px;
-}
-
-#track {
-  position:relative;
-  left:0px;
-  height:1px;
-}
-
-.triangle {
-  position:absolute;
-  width: 0; 
-  height: 0; 
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  left:-12px;
-}
-
-#redtriangle {
-  position:absolute;
-  border-top: 12px solid var(--red-color);
-  bottom:0;
-}
-
-#bluetriangle {
-  border-bottom: 12px solid var(--blue-color);
-  top:0;
-}
-
-.score {
-  position:relative;
-  display:block;
-  color: white;
-  height:80px;
-  left:0px;
-  right:100px;
-}
-
-.scoreboard {
-  transition:left 1.5s ease-in-out;
-    position:absolute;
-    left:-15px;
-    width:185px;
-    padding-left:2px;
-    padding-right:2px;
-    border-radius:5px;
-}
-
-.pegarea {
-    transition: left 1.5s ease-in-out;
-    display:block;
-    position:absolute;
-    top:0px;
-    left:0px;
-    height:100%;
-}
-
-#redpegarea {
-}
-
-#redscoreboard {
-    background-color: var(--red-color);
-    bottom:12px;
-}
-
-#bluescoreboard {
-  background-color: var(--blue-color);
-  top:12px;
-}
-
-#centerline {
-  position:absolute;
-  width:100%;
-  top:0;
-  border-top:1px solid #666666;
-}
-
-.cornerline {
-  position:absolute;
-  border-left:1px solid #666666;
-  width:1px;
-  height:19px;
-  top:-9px;
-  color:#666666;
-}
-
-.skunkline {
-  position:absolute;
-  border:0px;
-  top:-12px;
-  color:black;
-  left:75%;
-  text-align:center;
-  margin-left:-2px;
-  font-size:23px;
 }
 
 /**** History ****/
@@ -316,16 +153,44 @@ div#history::-webkit-scrollbar {
   text-align:center;
   vertical-align:bottom;
   display:inline-block;
-  transition:all 1s ease;
-  min-width:40px;
   line-height:25px;
+  min-width:50px;
+  
+  transition: all 1s ease;
+  
+}
+
+.historyitem span {
+    display:inline-block;
+}
+
+.historydetails {
+    display:inline-block;
+    min-width:0;
+    max-width:0;
+    overflow-x:hidden;
+    vertical-align:bottom;
+    white-space:nowrap;
+    transition: min-width 1s ease, max-width 1s ease, margin-left 1s ease;
+}
+
+.historywide {
+    min-width:75px;
+}
+
+.historysmall {
+    font-size:6px;
 }
 
 #currentscore {
+
+}
+
+.historybig {
   font-size:60px;
   line-height:100px;
   height:100px;
-  min-width:100px;
+  width:100px;
 }
 
 .historyoffscreen {
@@ -414,28 +279,6 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 
-#goal {
-  position:absolute;
-  right:0px;
-  width:100px;
-  text-align:center;
-  font-size:48px;
-  top: 50%;
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);  
-}
-
-#goal.disabled {
-  opacity:25%;
-}
-
-#goal.bluewinner {
-  text-shadow: 0 0 8px var(--blue-color), 0 0 12px var(--blue-color), 0 0 16px var(--blue-color), 0 0 22px var(--blue-color);
-}
-
-#goal.redwinner {
-  text-shadow: 0 0 8px var(--red-color), 0 0 12px var(--red-color), 0 0 16px var(--red-color), 0 0 22px var(--red-color);  
-}
 
 
 #overlay {
