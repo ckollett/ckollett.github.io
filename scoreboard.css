@@ -1,0 +1,154 @@
+#scorecontainer {
+  position:relative;
+  height:161px;
+  width:100%;
+}
+
+#scoreboard {
+    position:absolute;
+    top:0px;
+    right:100px;
+    left:20px;
+}
+
+.score {
+  position:relative;
+  display:block;
+  color: white;
+  height:80px;
+  left:0px;
+  right:100px;
+}
+
+.scoreboard {
+  transition:left 1.5s ease-in-out;
+  position:absolute;
+  left:-15px;
+  width:185px;
+  padding-left:2px;
+  padding-right:2px;
+  border-radius:5px;
+}
+
+.pegarea {
+  transition: left 1.5s ease-in-out;
+  display:block;
+  position:absolute;
+  top:0px;
+  left:0px;
+  height:100%;
+}
+
+#redscoreboard {
+    background-color: var(--red-color);
+    bottom:12px;
+}
+
+#bluescoreboard {
+  background-color: var(--blue-color);
+  top:12px;
+}
+
+.total {
+  font-size:48px;
+  display:inline-block;
+  color:white;
+  width:65px;
+  text-align:center;
+}
+
+.subtotals {
+  position:absolute;
+  display:inline-block;
+  font-size:14px;
+  right:3px;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);  
+  
+}
+
+.subtotallabels {
+    font-size:12px;
+}
+
+table.subtotals td {
+  text-align:center;
+}
+
+#track {
+  position:relative;
+  left:0px;
+  height:1px;
+}
+
+.triangle {
+  position:absolute;
+  width: 0; 
+  height: 0; 
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  left:-12px;
+}
+
+#redtriangle {
+  position:absolute;
+  border-top: 12px solid var(--red-color);
+  bottom:0;
+}
+
+#bluetriangle {
+  border-bottom: 12px solid var(--blue-color);
+  top:0;
+}
+
+
+#centerline {
+  position:absolute;
+  width:100%;
+  top:0;
+  border-top:1px solid #666666;
+}
+
+.cornerline {
+  position:absolute;
+  border-left:1px solid #666666;
+  width:1px;
+  height:19px;
+  top:-9px;
+  color:#666666;
+}
+
+.skunkline {
+  position:absolute;
+  border:0px;
+  top:-12px;
+  color:black;
+  left:75%;
+  text-align:center;
+  margin-left:-2px;
+  font-size:23px;
+}
+
+#goal {
+  position:absolute;
+  right:0px;
+  width:100px;
+  text-align:center;
+  font-size:48px;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);  
+}
+
+#goal.disabled {
+  opacity:25%;
+}
+
+#goal.bluewinner {
+  text-shadow: 0 0 8px var(--blue-color), 0 0 12px var(--blue-color), 0 0 16px var(--blue-color), 0 0 22px var(--blue-color);
+}
+
+#goal.redwinner {
+  text-shadow: 0 0 8px var(--red-color), 0 0 12px var(--red-color), 0 0 16px var(--red-color), 0 0 22px var(--red-color);  
+}
