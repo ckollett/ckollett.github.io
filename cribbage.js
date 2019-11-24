@@ -390,26 +390,27 @@ function addToHistory(scoringPlay) {
   
   scoreNugget.parentElement.insertBefore(newElt, scoreNugget);
   scoreNugget.removeAttribute("id");
-  scoreNugget.classList.remove("currentscore");
+  // Can historybig and historywide be consolidated?
+  scoreNugget.classList.remove("historybig");
+  scoreNugget.classList.remove("historywide");
   scoreNugget.classList.add(scoringPlay.color + "historyitem");
+  var details = scoreNugget.querySelector(".historydetails");
+  setTimeout(function() {
+    details.appendChild(buildHistoryNode(scoringPlay));
+    details.style.maxWidth = "100px";
+    details.style.minWidth = "1px";
+    details.style.marginLeft = "5px";
+  },200);
+
   
   scoreNugget.onclick = confirmUndo;
-  setTimeout(function() {
-    scoreNugget.innerHTML = "";
-    scoreNugget.appendChild(buildHistoryNode(scoringPlay));
-  },800);
-
 }
 
 function buildHistoryNode(scoringPlay) {
   var elt = document.createElement("span");
   
-  var score = document.createElement("span");
-  score.classList.add("historyelt");
-  score.innerHTML = scoringPlay.score;
-  elt.appendChild(score);
-  
   var type = document.createElement("span");
+  //type.classList.add("historysmall");
   type.innerHTML = scoringPlay.type;
   elt.appendChild(type);
   
@@ -430,12 +431,11 @@ function buildHistoryNode(scoringPlay) {
 
 function sliderMoved() {
   var bigSlider = document.getElementById("currentscore");
-  bigSlider.innerHTML = document.getElementById("slider").value;
+  bigSlider.querySelector(".currentvalue").innerHTML = document.getElementById("slider").value;
 }
 
 function fullscreen() {
   if (document.documentElement.requestFullscreen) {
-    console.log("Full screen element: " + document.fullscreenElement);
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
