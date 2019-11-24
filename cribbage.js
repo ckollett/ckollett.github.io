@@ -129,7 +129,8 @@ function pointsScored(color, score, type) {
   var scoringPlay = {
     color: color,
     score: score,
-    type: type
+    type: type,
+    dealer: game.state.dealer
   };
   addIcon(scoringPlay);
 
