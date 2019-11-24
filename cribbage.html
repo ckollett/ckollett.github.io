@@ -2,6 +2,7 @@
 <html>
 <head>
 <link rel="stylesheet" href="cribbage.css">
+<link rel="stylesheet" href="scoreboard.css">
 <script type="text/javascript" src="cribbage.js"></script>
 </head>
 <body>
@@ -31,8 +32,8 @@
 
  
   <!-- Scoreboard/Pegging -->
-  <div id="top">
-    <div id="pegcontainer">
+  <div id="scorecontainer">
+    <div id="scoreboard">
       <div class="score" id="redscorearea">
         <div id="redpegarea" class="pegarea">
           <div id="redscoreboard" class="scoreboard">
@@ -47,9 +48,9 @@
                 <td>Crib</td>
               </tr>
               <tr>
-                <td id="redPeg" class="subtotal">0</td>
-                <td id="redHand" class="subtotal">0</td>
-                <td id="redCrib" class="subtotal">0</td>
+                <td id="redPeg">0</td>
+                <td id="redHand">0</td>
+                <td id="redCrib">0</td>
               </tr>
             </table>
           </div>
@@ -77,9 +78,9 @@
                 <td>Crib</td>
               </tr>
               <tr>
-                <td id="bluePeg" class="subtotal">0</td>
-                <td id="blueHand" class="subtotal">0</td>
-                <td id="blueCrib" class="subtotal">0</td>
+                <td id="bluePeg">0</td>
+                <td id="blueHand">0</td>
+                <td id="blueCrib">0</td>
               </tr>
             </table>
           </div>
@@ -101,7 +102,7 @@
   <div id="controls">
     
     <div id="history">
-      <div class="historyitem" id="currentscore">1</div>
+      <div class="historyitem historywide historybig" id="currentscore"><span class="currentvalue">1</span><span class="historydetails"></span></div>
     </div>
     
     <span class="scoreButtons">
@@ -114,10 +115,9 @@
         <span id="messageIcon"></span>
         <span id="messageText"></span>
       </div>
-
     </span>
 
-    <span class="full-screen" onclick="fullscreen();"></span>
+    <span class="fullscreen" onclick="fullscreen();"></span>
   </div>
 </div>
 </div>
@@ -133,16 +133,6 @@
   </span>
   <span id="clock">0:00</span>
 </div>
-
-<div style="display:none" id="historyprototype">
-  <span class="historyitem">
-    <span class="historyscore"></span>
-  <span class="historytype"></span>
-  <span class="historyicon"></span>
-  </span>
-  <span id="historyundo" onclick="undo();">&#215;</span>
-</div>
-
 
 </body>
 </html>
