@@ -24,7 +24,6 @@ div#history::-webkit-scrollbar {
   min-width:50px;
   
   transition: all 1s ease;
-  
 }
 
 .historyitem span {
@@ -41,20 +40,15 @@ div#history::-webkit-scrollbar {
     transition: min-width 1s ease, max-width 1s ease, margin-left 1s ease;
 }
 
-.historysmall {
-    font-size:6px;
-}
-
-#currentscore {
-
-}
-
 .historybig {
-  font-size:60px;
   line-height:100px;
   height:100px;
   width:100px;
   min-width:75px;
+  font-size:60px;
+}
+
+#currentscore > .currentvalue {
 }
 
 .historyoffscreen {

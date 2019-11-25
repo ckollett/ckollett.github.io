@@ -382,20 +382,19 @@ function incrementTotalBox(totalBox, inc, delay) {
 }
 
 function addToHistory(scoringPlay) {
-  var scoreNugget = document.getElementById("currentscore");
-  var newElt = scoreNugget.cloneNode(true);
-  newElt.classList.add("historyoffscreen");
+  var oldHistoryElt = document.getElementById("currentscore");
+  
+  var newHistoryElt = oldHistoryElt.cloneNode(true);
+  newHistoryElt.classList.add("historyoffscreen");
   setTimeout(function() {
-    newElt.classList.remove("historyoffscreen");
+    newHistoryElt.classList.remove("historyoffscreen");
   },1);
   
-  scoreNugget.parentElement.insertBefore(newElt, scoreNugget);
-  scoreNugget.removeAttribute("id");
-  // Can historybig and historywide be consolidated?
-  scoreNugget.classList.remove("historybig");
-  scoreNugget.classList.remove("historywide");
-  scoreNugget.classList.add(scoringPlay.color + "historyitem");
-  var details = scoreNugget.querySelector(".historydetails");
+  oldHistoryElt.parentElement.insertBefore(newHistoryElt, oldHistoryElt);
+  oldHistoryElt.removeAttribute("id");
+  oldHistoryElt.classList.remove("historybig");
+  oldHistoryElt.classList.add(scoringPlay.color + "historyitem");
+  var details = oldHistoryElt.querySelector(".historydetails");
   setTimeout(function() {
     details.appendChild(buildHistoryNode(scoringPlay));
     details.style.maxWidth = "100px";
@@ -404,7 +403,7 @@ function addToHistory(scoringPlay) {
   },200);
 
   
-  scoreNugget.onclick = confirmUndo;
+  oldHistoryElt.onclick = confirmUndo;
 }
 
 function buildHistoryNode(scoringPlay) {
