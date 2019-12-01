@@ -21,6 +21,15 @@ function showLastGame() {
 
 function startGame(firstDealer) {
   window.game = new Game([], new PeggingStartedState(firstDealer));
+  addDealerDisplay();
+}
+
+// TODO: This can be much cleaner!
+function addDealerDisplay(dealer) {
+    if (!dealer) {
+        dealer = window.game.state.dealer;
+    }
+    document.getElementById("currentscore").classList.add(dealer + "dealer");
 }
 
 function undo() {
@@ -50,13 +59,15 @@ function restore() {
   window.game = new Game(savedGame.history, savedGame.state);
   historyChanged();
   savedGame.history.forEach(function(item) {
+    addDealerDisplay(item.state.dealer);
     addToHistory(item.play);
   });
+  addDealerDisplay();
 }
 
 /* ********* Basic constants ********* */
 
-window.historyListeners = [updateScoreboard, movePeg];
+window.historyListeners = [updateScoreboard, movePeg, addDealerDisplay];
 window.playListeners = [addToHistory, addMessage];
 
 /* ********* Gameplay objects ********* */
@@ -130,7 +141,6 @@ function pointsScored(color, score, type) {
     color: color,
     score: score,
     type: type,
-    dealer: game.state.dealer
   };
   addIcon(scoringPlay);
 
@@ -386,14 +396,21 @@ function addToHistory(scoringPlay) {
   
   var newHistoryElt = oldHistoryElt.cloneNode(true);
   newHistoryElt.classList.add("historyoffscreen");
+  // Blech...
+  newHistoryElt.classList.remove("reddealer");
+  newHistoryElt.classList.remove("bluedealer");
   setTimeout(function() {
     newHistoryElt.classList.remove("historyoffscreen");
   },1);
   
   oldHistoryElt.parentElement.insertBefore(newHistoryElt, oldHistoryElt);
+  
   oldHistoryElt.removeAttribute("id");
   oldHistoryElt.classList.remove("historybig");
   oldHistoryElt.classList.add(scoringPlay.color + "historyitem");
+  if (scoringPlay.type !== "Crib") {
+      oldHistoryElt.classList.add("connecthand");
+  }
   var details = oldHistoryElt.querySelector(".historydetails");
   setTimeout(function() {
     details.appendChild(buildHistoryNode(scoringPlay));

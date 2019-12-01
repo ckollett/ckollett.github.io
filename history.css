@@ -2,10 +2,10 @@ div#history {
   position:relative;
   display:table-cell;
   width:100%;
-  height:100px;
+  height:115px;
   vertical-align:bottom;
-  overflow-x:auto;
-  white-space:nowrap;
+  overflow-x:scroll;
+  white-space:nowrap;  
 }
 
 div#history::-webkit-scrollbar { 
@@ -22,12 +22,36 @@ div#history::-webkit-scrollbar {
   display:inline-block;
   line-height:25px;
   min-width:50px;
+  position:relative;
+  bottom:10px;
   
   transition: all 1s ease;
 }
 
 .historyitem span {
     display:inline-block;
+}
+
+.historyitem::before {
+  content: " ";
+  position: absolute;
+  z-index: -1;
+  left: 0px;
+  right: 0px;
+  bottom: -12px;
+  border: 3px solid white;
+}
+
+.historyitem.reddealer::before {
+    border-color:var(--red-color);
+}
+
+.historyitem.bluedealer::before {
+    border-color:var(--blue-color);
+}
+
+.historyitem.connecthand::before {
+    left:-10px;
 }
 
 .historydetails {
@@ -41,9 +65,9 @@ div#history::-webkit-scrollbar {
 }
 
 .historybig {
-  line-height:100px;
-  height:100px;
-  width:100px;
+  line-height:95px;
+  height:95px;
+  width:95px;
   min-width:75px;
   font-size:60px;
 }
