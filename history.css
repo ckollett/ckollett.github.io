@@ -6,6 +6,8 @@ div#history {
   vertical-align:bottom;
   overflow-x:auto;
   white-space:nowrap;  
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 div#history::-webkit-scrollbar { 
