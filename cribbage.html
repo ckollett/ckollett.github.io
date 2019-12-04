@@ -95,18 +95,19 @@
 
   <!-- Scoring Slider -->
   <div>
-    <div>
-      <input type="range" min="0" max="33" id="slider" oninput="sliderMoved()" value="1" class="fullwidth">
+    <div id="slidercontainer">
+      <input type="range" min="0" max="33" id="slider" oninput="sliderMoved()" value="1">
     </div>
   </div>
 
   <!-- Buttons and History -->
   <div id="controls">
-    
+    <div id="historycontainer">
     <div id="history">
       <div class="historyitem historywide historybig" id="currentscore">
         <span class="currentvalue">1</span><span class="historydetails"></span>
       </div>
+    </div>
     </div>
     
     <span class="scoreButtons">

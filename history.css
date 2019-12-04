@@ -1,14 +1,22 @@
+div#historycontainer {
+  position:relative;
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling: touch;
+  white-space:nowrap;  
+  padding-left:10px;
+}
+
 div#history {
   position:relative;
   display:table-cell;
   width:100%;
   height:115px;
   vertical-align:bottom;
-  overflow-x:auto;
-  white-space:nowrap;  
+  white-space:nowrap;
 }
 
-div#history::-webkit-scrollbar { 
+div#historycontainer::-webkit-scrollbar { 
   display: none; 
 } 
 
