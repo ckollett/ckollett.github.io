@@ -24,7 +24,6 @@ function startGame(firstDealer) {
   addDealerDisplay();
 }
 
-// TODO: This can be much cleaner!
 function addDealerDisplay(dealer) {
     if (!dealer) {
         dealer = window.game.state.dealer;
@@ -135,11 +134,12 @@ function handleScoreButton(color, type) {
 
 function pointsScored(color, score, type) {
   var total = getScores()[color].getTotal();
-  score = Math.min(121 - total, score);
+  var counted = Math.min(121 - total, score);
 
   var scoringPlay = {
     color: color,
-    score: score,
+    value: score,
+    score: counted,
     type: type,
   };
   addIcon(scoringPlay);
@@ -486,16 +486,16 @@ function swapColor(color) {
 
 /* ********* Fun Stuff ********* */
 function addIcon(play) {
-  if (play.score >= 15) {
+  if (play.value >= 15) {
     play.icon = "&#x1F479;";
     play.message = "Monster!";
     if (play.color === "blue") {
       play.iconClass = "bluemonster";
     }
-  } else if (play.type === "Crib" && play.score === 0) {
+  } else if (play.type === "Crib" && play.value === 0) {
     play.icon = "&#x1F627";
     play.message = "Deep Sigh...";
-  } else if (play.type === "Hand" && play.score < 5) {
+  } else if (play.type === "Hand" && play.value < 5) {
     play.icon = "&#x1F60F";
     play.message = "Scoff";
   }
