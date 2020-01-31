@@ -20,7 +20,8 @@ function showLastGame() {
 }
 
 function startGame(firstDealer) {
-  window.game = new Game([], new PeggingStartedState(firstDealer));
+  window.game = new Game([], new BeforePeggingState(firstDealer));
+  window.game.state.updateUI();
   addDealerDisplay();
 }
 
@@ -110,7 +111,11 @@ ColorScores.prototype.getTotal = function() {
   return this.Peg + this.Hand + this.Crib;
 };
 ColorScores.prototype.addPlay = function(scoringPlay) {
-  this[scoringPlay.type] += scoringPlay.score;
+  var type = scoringPlay.type;
+  if (type === "Nobs") {
+    type="Peg";
+  }
+  this[type] += scoringPlay.score;
 };
 
 /* ********* Gameplay functions ********* */
@@ -126,7 +131,13 @@ function handleCountButton() {
 }
 
 function handleScoreButton(color, type) {
-  var score = parseInt(document.getElementById("slider").value);
+  if (type === "Nobs") {
+    var score = 2;
+    var bigSlider = document.getElementById("currentscore");
+    bigSlider.querySelector(".currentvalue").innerHTML = "2";
+  } else {
+    var score = parseInt(document.getElementById("slider").value);
+  }
   pointsScored(color, score, type);
   document.getElementById("slider").value = 1;
   sliderMoved();
@@ -168,6 +179,23 @@ function nextState(scoringPlay) {
 
 /* ********* Game states ********* */
 
+function BeforePeggingState(dealer) {
+    this.name = "bp";
+    this.dealer = dealer;
+    
+    this.next = function(play) {
+       return new PeggingStartedState(this.dealer);
+    }
+    
+    this.getCountingColor = function() {
+      return this.dealer;
+    }
+    
+    this.updateUI = function() {
+      updateButtons(true, true, this.dealer, "Nobs");
+    }
+}
+
 function PeggingStartedState(dealer) {
   this.name = "ps";
   this.dealer = dealer;
@@ -179,6 +207,10 @@ function PeggingStartedState(dealer) {
       return this;
     }
   };
+
+  this.getCountingColor = function() {
+    return swapColor(this.dealer);
+  }
 
   this.updateUI = function() {
     updateButtons(true, false, swapColor(this.dealer), "Hand");
@@ -232,7 +264,7 @@ function SecondHandCountedState(dealer) {
   };
 
   this.next = function(play) {
-    return new PeggingStartedState(swapColor(this.dealer));
+    return new BeforePeggingState(swapColor(this.dealer));
   };
 
   this.updateUI = function() {
@@ -304,6 +336,8 @@ function resolveState(stateObj) {
   }
 
   switch (stateObj.name) {
+    case "bp":
+      return new BeforePeggingState(stateObj.dealer);
     case "ps":
       return new PeggingStartedState(stateObj.dealer);
     case "dp":
