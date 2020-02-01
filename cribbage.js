@@ -184,7 +184,11 @@ function BeforePeggingState(dealer) {
     this.dealer = dealer;
     
     this.next = function(play) {
-       return new PeggingStartedState(this.dealer);
+       if (play.type === "Peg" && play.color === this.dealer) {
+         return new DealerPeggedState(this.dealer);
+       } else {
+         return new PeggingStartedState(this.dealer);
+       }
     }
     
     this.getCountingColor = function() {
