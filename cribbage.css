@@ -127,6 +127,7 @@ button#handCribButton {
   position:absolute;
   left:170px;
   height:60%;
+  padding-right:50px;
   top:0;
 }
 

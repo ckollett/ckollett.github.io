@@ -86,6 +86,7 @@ function historyChanged() {
 function Game(history, state) {
   this.history = history;
   this.state = resolveState(state);
+  this.flags = [];
   showBoard();
 }
 
@@ -166,6 +167,10 @@ function pointsScored(color, score, type) {
   game.history.push(historyItem);
   game.state = nextState(scoringPlay);
   historyChanged();
+
+  if (type === "Crib") {
+    handleFlags();
+  }
 }
 
 function nextState(scoringPlay) {
@@ -536,6 +541,9 @@ function addIcon(play) {
   } else if (play.type === "Hand" && play.value < 5) {
     play.icon = "&#x1F60F";
     play.message = "Scoff";
+  } else if (play.type === "Nobs") {
+    play.icon = "&#x1F139;"
+    play.message = "Nobs!"
   }
 }
 
@@ -598,8 +606,35 @@ function removeOverlay() {
 }
 
 function confirmUndo() {
-  var undoSelection = confirm("Undo last play?");
-  if (undoSelection) {
-    undo();
+  var undoMessage = '<button onclick="undo();">Undo</button> <button onclick="removeOverlay();">Cancel</button>';
+  addOverlay({"message" : undoMessage}, false);
+}
+
+function handleFlags() {
+  var flags = getFlaggedColors();
+  if (flags.length > 0) {
+    var flagMessage = '<button onclick="flagsResolved();">Flags</button>';
+    addOverlay({"message":flagMessage},false);
   }
+}
+
+function flagsResolved() {
+  disableFlags();
+  removeOverlay();
+}
+
+function disableFlags() {
+    var flagElts = document.getElementsByClassName("enabledflag");
+    for (var i = 0; i < flagElts.length; i++) {
+        flagElts[i].classList.remove("enabledflag");
+    }
+}
+
+function toggleFlag(color) {
+    var flagElt = document.getElementById(color + "flag");
+    flagElt.classList.toggle("enabledflag");
+}
+
+function getFlaggedColors() {
+    return document.getElementsByClassName("enabledflag");
 }

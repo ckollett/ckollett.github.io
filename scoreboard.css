@@ -32,11 +32,30 @@
 
 .pegarea {
   transition: left 1.5s ease-in-out;
-  display:block;
+  display:inline-block;
   position:absolute;
   top:0px;
   left:0px;
   height:100%;
+}
+
+.flag {
+  position:absolute;
+  display:inline-block;
+  left:195px;
+  font-size:28px;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%); 
+  opacity:25%;
+}
+
+#blueflag {
+   filter:hue-rotate(210deg);
+}
+
+.enabledflag {
+    opacity:100%;
 }
 
 #redscoreboard {
