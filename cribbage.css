@@ -8,6 +8,15 @@ body {
   box-sizing:border-box;
 }
 
+div {
+      -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently */
+}
+
 #startGame {
   width:100%;
   text-align:center;
@@ -149,15 +158,32 @@ button#handCribButton {
 }
 
 #slidercontainer {
+    width:90%;
+    margin-left:5%;
+    margin-right:5%;
+}
+
+#sliderticks {
+    position:relative;
     width:100%;
+    display:flex;
+    justify-content: space-between;
+}
+
+.slidertick {
+    width:20px;
     text-align:center;
+    color:white;
+}
+
+.visibletick {
+    color:black;
 }
 
 input[type=range] {
   height: 25px;
   -webkit-appearance: none;
-  padding: 10px;
-  width: 95%;
+  width: 100%;
   box-sizing:border-box;
   text-align:center;
 }
