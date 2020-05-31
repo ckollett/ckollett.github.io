@@ -2,6 +2,15 @@
 <head>
 
 <style>
+@font-face {
+  font-family: 'katahdin';
+  src: url('fonts/katahdin-round.regular.otf');
+}
+
+body {
+    font-family: katahdin, sans-serif;
+}
+
 .pile {
   width: 260px;
   height: 200px;
@@ -20,6 +29,11 @@
   cursor: pointer;
   transform-style: preserve-3d;
   transition: transform 0.75s;
+  background-color:white;
+}
+
+.topcard {
+  z-index:1000;
 }
 
 .flipped {
@@ -37,14 +51,22 @@
   font-size: 40px;
   backface-visibility: hidden;
   border-radius:10px;
+  opacity:1;
 }
 
 .card_front {
-  background: red;
+  background: white;
+  border:2px solid black;
+  background: url('EXPLO_logo.png');
+  background-repeat: no-repeat;
+  background-position: center;  
+  background-size: 80%;
 }
 
 .card_back {
-  background: blue;
+  background: white;
+  color: black;
+  border:2px solid black;
   transform: rotateX(180deg);
 }
 
@@ -63,12 +85,12 @@ function createPile(id) {
 function createCard(text, pile, idx) {
   const card = document.createElement("div");
   card.classList.add("card");
-  card.style.zIndex = "" + idx;
+  card.style.zIndex = "" + (idx+1);
   
   const front = document.createElement("div");
   front.classList.add("cardface");
   front.classList.add("card_front");
-  front.innerHTML = "?";
+  front.innerHTML = " ";
   
   const back = document.createElement("div");
   back.classList.add("cardface");
@@ -79,10 +101,23 @@ function createCard(text, pile, idx) {
   card.appendChild(back);
   
   card.addEventListener("click", function() {
+    const pileElt = document.getElementById(pile);
+    const top = pileElt.querySelector(".topcard");
+	if (top) {
+	    const numFlipped = pileElt.getElementsByClassName("flipped").length;
+	    const numInPile = pileElt.getElementsByClassName("card").length;
+		if (top.classList.contains("flipped")) {
+		    top.style.zIndex = "" + numFlipped;
+		} else {
+		    top.style.zIndex = "" + (numInPile-numFlipped); 
+		}
+		top.classList.remove("topcard");
+	}
+  
+    card.style.zIndex = "";
+    card.classList.add("topcard");
     card.classList.toggle("flipped");
 	var zIndex = parseInt(card.style.zIndex);
-	card.style.zIndex = "" + (1000-zIndex);
-	
   })
   document.getElementById(pile).append(card);
 }
