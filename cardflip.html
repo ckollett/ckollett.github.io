@@ -11,6 +11,14 @@ body {
     font-family: katahdin, sans-serif;
 }
 
+div {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .pile {
   width: 260px;
   height: 200px;
@@ -65,7 +73,7 @@ body {
 
 .card_back {
   background: white;
-  color: black;
+  color: #f79320;
   border:2px solid black;
   transform: rotateX(180deg);
 }
