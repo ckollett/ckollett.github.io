@@ -50,32 +50,36 @@ div {
 
 .cardface {
   position: absolute;
+  display:table;
   width: 100%;
   height: 100%;
-  line-height: 200px;
   color: white;
   text-align: center;
   font-weight: bold;
-  font-size: 40px;
-  backface-visibility: hidden;
+  font-size: 32px;
+  frontface-visibility: hidden;
   border-radius:10px;
   opacity:1;
 }
 
-.card_front {
+.card_back {
   background: white;
   border:2px solid black;
-  background: url('EXPLO_logo.png');
-  background-repeat: no-repeat;
-  background-position: center;  
-  background-size: 80%;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;  
 }
 
-.card_back {
+.card_front {
   background: white;
   color: #f79320;
   border:2px solid black;
   transform: rotateX(180deg);
+}
+
+.card_content {
+  display:table-cell;
+  vertical-align:middle;
+  text-align:center;
 }
 
 </style>
@@ -84,48 +88,57 @@ div {
 <body>
 <script>
 function createPile(id) {
-    const pile = document.createElement("div");
-	pile.id = id;
-	pile.classList.add("pile");
-	document.body.append(pile);
+  const pile = document.createElement("div");
+  pile.id = id;
+  pile.classList.add("pile");
+  document.body.append(pile);
 }
 
-function createCard(text, pile, idx) {
+function createCard(frontColor, frontText, text, pile, idx) {
   const card = document.createElement("div");
   card.classList.add("card");
   card.style.zIndex = "" + (idx+1);
   
-  const front = document.createElement("div");
-  front.classList.add("cardface");
-  front.classList.add("card_front");
-  front.innerHTML = " ";
-  
   const back = document.createElement("div");
   back.classList.add("cardface");
   back.classList.add("card_back");
-  back.innerHTML = text;
+  back.style.backgroundColor = frontColor;
+  const backContent = document.createElement("div");
+  backContent.classList.add("card_content");
+  backContent.innerHTML = frontText;
+  back.appendChild(backContent);
   
-  card.appendChild(front);
+  const front = document.createElement("div");
+  front.classList.add("cardface");
+  front.classList.add("card_front");
+  const frontContent = document.createElement("div");
+  frontContent.classList.add("card_content");
+  frontContent.innerHTML = text;
+  front.appendChild(frontContent);
+  
   card.appendChild(back);
+  card.appendChild(front);
   
   card.addEventListener("click", function() {
     const pileElt = document.getElementById(pile);
     const top = pileElt.querySelector(".topcard");
-	if (top) {
-	    const numFlipped = pileElt.getElementsByClassName("flipped").length;
-	    const numInPile = pileElt.getElementsByClassName("card").length;
-		if (top.classList.contains("flipped")) {
-		    top.style.zIndex = "" + numFlipped;
-		} else {
-		    top.style.zIndex = "" + (numInPile-numFlipped); 
-		}
-		top.classList.remove("topcard");
-	}
+    if (top) {
+       // Adjust the z-index of the last card we flipped since it will no longer
+       // be the card we want at the very top of the pile.
+      const numFlipped = pileElt.getElementsByClassName("flipped").length;
+      const numInPile = pileElt.getElementsByClassName("card").length;
+      if (top.classList.contains("flipped")) {
+        top.style.zIndex = "" + numFlipped;
+      } else {
+        top.style.zIndex = "" + (numInPile-numFlipped); 
+      }
+      top.classList.remove("topcard");
+    }
   
     card.style.zIndex = "";
     card.classList.add("topcard");
     card.classList.toggle("flipped");
-	var zIndex = parseInt(card.style.zIndex);
+    var zIndex = parseInt(card.style.zIndex);
   })
   document.getElementById(pile).append(card);
 }
@@ -145,16 +158,29 @@ function getCards() {
 }
 
 function addCardsToPiles(cardData) {
-    for (let i = 0; i < cardData.values.length; i++) {
-	    const pileName = "pile" + i;
-		createPile(pileName);
-	    const names = cardData.values[i];
-		for (let j = 0; j < names.length; j++) {
-			const name = names[j];
-			createCard(name, pileName, j);
-		}
-	}
+  for (let i = 0; i < cardData.values.length; i++) {
+    const columnValues = cardData.values[i];
+    const pileName = "pile" + i;
+    createPile(pileName);
 
+	const bgColor = columnValues[0];
+	const frontText = columnValues[1];
+	
+	const cards = columnValues.slice(2);
+	shuffle(cards);
+    for (let j = 0; j < cards.length; j++) {
+      const cardText = cards[j];
+      createCard(bgColor, frontText, cardText, pileName, j);
+    }
+  }
+
+}
+
+function shuffle(cards) {
+    for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
 }
 
 getCards();
