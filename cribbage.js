@@ -23,6 +23,9 @@ function startGame(firstDealer) {
   window.game = new Game([], new BeforePeggingState(firstDealer));
   window.game.state.updateUI();
   addDealerDisplay();
+  var slider = document.getElementById("slider");
+  slider.addEventListener("mousemove", showSliderTip);
+  slider.addEventListener("mouseout", hideSliderTip);
 }
 
 function addDealerDisplay(dealer) {
@@ -637,4 +640,35 @@ function toggleFlag(color) {
 
 function getFlaggedColors() {
     return document.getElementsByClassName("enabledflag");
+}
+
+function showSliderTip(evt) {
+	// The slider button is 25px wide.
+	var xPos = evt.offsetX - 12.5;
+	var sliderWidth = evt.target.clientWidth - 25;
+	var rawScore = 33 * xPos / sliderWidth;
+	var score = Math.round(rawScore);
+	hideSliderTip();
+	if ((score ==0 || score % 4 != 0) && Math.abs(score-rawScore) < 0.4) {
+		displaySliderTip(score);
+	}
+}
+
+function hideSliderTip() {
+	var curActiveTick = document.getElementsByClassName("activetick");
+	if (curActiveTick) {
+		for (let tick of curActiveTick) {
+			tick.classList.remove("activetick");
+			var tickValue = parseInt(tick.innerHTML);
+			if (tickValue === 0 || tickValue % 4 != 0) {
+				tick.classList.remove("visibletick");
+			}
+		}
+	}
+}
+
+function displaySliderTip(score) {
+	var activeTick = document.getElementById("tick" + score);
+	activeTick.classList.add("visibletick");
+	activeTick.classList.add("activetick");
 }

@@ -165,19 +165,25 @@ button#handCribButton {
 
 #sliderticks {
     position:relative;
-    width:100%;
+    width:calc(100%+10px);
     display:flex;
+	margin-left:-5px
+	margin-right:-5px;
     justify-content: space-between;
 }
 
 .slidertick {
-    width:20px;
+    width:25px;
     text-align:center;
     color:white;
 }
 
 .visibletick {
     color:black;
+}
+
+.activetick {
+	color:#999999;
 }
 
 input[type=range] {
