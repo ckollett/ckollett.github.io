@@ -177,12 +177,15 @@ function pointsScored(color, score, type) {
 }
 
 function nextState(scoringPlay) {
-  var total = getScores()[scoringPlay.color].getTotal();
-  if (total > 120) {
+  if (isGameOver(scoringPlay.color, 0)) {
     return new GameOverState(scoringPlay.color);
   } else {
     return game.state.next(scoringPlay);
   }
+}
+
+function isGameOver(color, newScore) {
+    return getScores()[color].getTotal() + newScore >= 121;
 }
 
 /* ********* Game states ********* */
@@ -454,7 +457,7 @@ function addToHistory(scoringPlay) {
   oldHistoryElt.removeAttribute("id");
   oldHistoryElt.classList.remove("historybig");
   oldHistoryElt.classList.add(scoringPlay.color + "historyitem");
-  if (scoringPlay.type !== "Crib") {
+  if (scoringPlay.type !== "Crib" && !isGameOver(scoringPlay.color, scoringPlay.value)) {
       oldHistoryElt.classList.add("connecthand");
   }
   var details = oldHistoryElt.querySelector(".historydetails");
@@ -464,7 +467,6 @@ function addToHistory(scoringPlay) {
     details.style.minWidth = "1px";
     details.style.marginLeft = "5px";
   },200);
-
   
   oldHistoryElt.onclick = confirmUndo;
 }
