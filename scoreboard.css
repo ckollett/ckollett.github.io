@@ -24,7 +24,7 @@
   transition:left 1.5s ease-in-out;
   position:absolute;
   left:-15px;
-  width:185px;
+  width:200px;
   padding-left:2px;
   padding-right:2px;
   border-radius:5px;
@@ -42,7 +42,7 @@
 .flag {
   position:absolute;
   display:inline-block;
-  left:195px;
+  left:205px;
   font-size:28px;
   top: 50%;
   -ms-transform: translateY(-50%);
@@ -69,10 +69,10 @@
 }
 
 .total {
-  font-size:48px;
+  font-size:36px;
   display:inline-block;
   color:white;
-  width:65px;
+  width:80px;
   text-align:center;
 }
 

@@ -1,6 +1,11 @@
 /**** Basic Page Layout ****/
+@font-face {
+  font-family: 'katahdin';
+  src: url('fonts/katahdin-round.regular.otf');
+}
+
 body {
-  font-family:sans-serif;
+  font-family: katahdin, sans-serif;
   padding:0px;
   margin:0px;
   --blue-color : #046CE5;
@@ -50,6 +55,7 @@ div {
 /**** General Controls ****/
 
 button {
+  font-family: katahdin, sans-serif;
   border-radius:10px;
   border-style:solid;
   width:120px;
