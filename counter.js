@@ -218,7 +218,9 @@ class Thing {
     getTupleName() {
         let name = "";
         for (let tuple of this.tuples) {
-            switch (tuple.count) {
+            let tupled = this.runsAndFifteens[0].values.filter(value => value === tuple.value);
+            let n = choose(tuple.count, tupled.length);
+            switch (n) {
                 case 2 : name += "double "; break;
                 case 3 : name += "triple "; break;
                 case 4 : name += "quadruple "; break;
