@@ -60,8 +60,25 @@ div.num.selected {
     color:white;
 }
 
-td {
-    padding-left:5px;
-    padding-right:5px;
-    text-align:center;
+div.header {
+    margin-left:30px;
+    margin-top:4px;
+    margin-bottom:4px;
+    width:500px;
+    height:30px;
+    position:relative;
+}
+
+button {
+    position:absolute;
+    right:0;
+    font-family: katahdin, sans-serif;
+    border-radius: 6px;
+    border-style: solid;
+    width: 150px;
+    border-width: 0px;
+    color: white;
+    background-color: black;
+    font-size: 18px;
+    outline: 0;
 }

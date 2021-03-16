@@ -1,12 +1,25 @@
 <html>
 <head>
-<link rel="icon" type="image/svg+xml" href="images/mug.svg" />
-<link rel="stylesheet" href="counter.css?202103161144">
+<link rel="icon" id="favicon" type="image/svg+xml" href="images/mug.svg" />
+<link rel="stylesheet" href="counter.css?202103160106">
 <title>Thing Finder</title>
-<script type="text/javascript" src="counter.js?202103161144"></script>
+<script type="text/javascript" src="counter.js?202103160106"></script>
+<script type="text/javascript" >
+currentIcon = 0;
+
+function updateIcon() {
+    const allicons = ["mug", "campfire", "sleepingbag", "tent"];
+    currentIcon = (currentIcon + 1) % 4;
+    const newicon = allicons[currentIcon];
+    document.getElementById("favicon").href = "images/" + newicon + ".svg";
+}
+    
+window.setInterval(updateIcon, 5000);
+</script>
 </head>
 <body>
-Select Five Tiles
+<div class="header">Select Five Tiles <button onclick="clearSelections();">Clear</button></div>
+
 <div class="selectrow">
   <div class="icon"><img src="images/campfire.svg" class="selecticon"></div>
   <div class="selectarea">

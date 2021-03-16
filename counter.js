@@ -271,3 +271,11 @@ class Thing {
         return score1 + score2;
     }
 }
+
+function clearSelections() {
+    let selectedNums = document.querySelectorAll("div.num.selected");
+    for (let selected of selectedNums) {
+        selected.classList.remove("selected");
+    }
+    document.getElementById("output").innerHTML = "";    
+}
