@@ -22,7 +22,7 @@ window.setInterval(updateIcon, 5000);
 
 <div class="selectrow">
   <div class="icon"><img src="images/campfire.svg" class="selecticon"></div>
-  <div class="selectarea">
+  <div class="selectarea" data-suit="campfire">
     <div class="num" onclick="toggleSelection(this);">1</div>
     <div class="num" onclick="toggleSelection(this);">2</div>
     <div class="num" onclick="toggleSelection(this);">3</div>
@@ -40,7 +40,7 @@ window.setInterval(updateIcon, 5000);
 </div>
 <div class="selectrow">
   <div class="icon"><img src="images/mug.svg" class="selecticon"></div>
-  <div class="selectarea">
+  <div class="selectarea" data-suit="mug">
     <div class="num" onclick="toggleSelection(this);">1</div>
     <div class="num" onclick="toggleSelection(this);">2</div>
     <div class="num" onclick="toggleSelection(this);">3</div>
@@ -58,7 +58,7 @@ window.setInterval(updateIcon, 5000);
 </div>
 <div class="selectrow">
   <div class="icon"><img src="images/sleepingbag.svg" class="selecticon"></div>
-  <div class="selectarea">
+  <div class="selectarea" data-suit="sleepingbag">
     <div class="num" onclick="toggleSelection(this);">1</div>
     <div class="num" onclick="toggleSelection(this);">2</div>
     <div class="num" onclick="toggleSelection(this);">3</div>
@@ -76,7 +76,7 @@ window.setInterval(updateIcon, 5000);
 </div>
 <div class="selectrow">
   <div class="icon"><img src="images/tent.svg" class="selecticon"></div>
-  <div class="selectarea">
+  <div class="selectarea" data-suit="tent">
     <div class="num" onclick="toggleSelection(this);">1</div>
     <div class="num" onclick="toggleSelection(this);">2</div>
     <div class="num" onclick="toggleSelection(this);">3</div>
@@ -91,6 +91,9 @@ window.setInterval(updateIcon, 5000);
     <div class="num" onclick="toggleSelection(this);">Q</div>
     <div class="num" onclick="toggleSelection(this);">K</div>
   </div>
+</div>
+
+<div id="tilerow">
 </div>
 
 <div id="output"></div>

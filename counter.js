@@ -1,7 +1,34 @@
 function toggleSelection(elt) {
-    elt.classList.toggle("selected");
-    
     let selectedElts = document.getElementsByClassName("selected");
+    
+    let added = false;
+    if (selectedElts.length < 5) {
+        added = elt.classList.toggle("selected");
+    } else {
+        // If there are already 5 selected allow deselection only.
+        elt.classList.remove("selected");
+    }
+    
+    let suit = elt.closest('.selectarea').getAttribute('data-suit');
+    let value = elt.innerHTML;
+    let tileId = suit + "_" + value;
+    if (added) {
+        let newTile = document.createElement('div');
+        newTile.id = tileId;
+        newTile.classList.add(suit);
+        newTile.classList.add('tile');
+        let valueElt = document.createElement('div');
+        valueElt.classList.add('value');
+        valueElt.innerHTML = value;
+        newTile.appendChild(valueElt);
+        document.getElementById('tilerow').appendChild(newTile);
+    } else {
+        let toRemove = document.getElementById(tileId);
+        if (toRemove) {
+            toRemove.remove();
+        }
+    }
+    
     if (selectedElts.length === 5) {
         let cards = [];
         for (let selected of selectedElts) {
@@ -43,19 +70,20 @@ function score(values) {
         things.push(thing);
     }
     
-
     // TODO: Is there a better way to do this?
     let uncountedTuples = tuples.filter(tuple => !tuple.hasRunOrFifteen);
     for (let tuple of uncountedTuples) {
         things.push(new Thing([tuple]));
     }
         
-
+    let total = 0;
     let output = "<ul>";
     for (let thing of things) {
         output += "<li>" + thing.toString() + "</lu>";
+        total += thing.getScore();
     }
     output += "</ul>";
+    output = "Total: " + total + output;
     document.getElementById("output").innerHTML = output;
 }
 
