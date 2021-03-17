@@ -305,5 +305,6 @@ function clearSelections() {
     for (let selected of selectedNums) {
         selected.classList.remove("selected");
     }
+    document.getElementById("tilerow").innerHTML = "";
     document.getElementById("output").innerHTML = "";    
 }
