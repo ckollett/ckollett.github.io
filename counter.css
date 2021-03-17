@@ -115,9 +115,13 @@ div#output {
     margin-left:30px;
 }
 
-button {
+div#buttons {
     position:absolute;
     right:0;
+    top:0;
+}
+
+button {
     font-family: katahdin, sans-serif;
     border-radius: 6px;
     border-style: solid;

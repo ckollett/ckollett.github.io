@@ -18,7 +18,13 @@ window.setInterval(updateIcon, 5000);
 </script>
 </head>
 <body>
-<div class="header">Select Five Tiles <button onclick="clearSelections();">Clear</button></div>
+<div class="header">Select Five Tiles
+<div id="buttons">
+<button onclick="countRandomHand();">Random</button>
+<button onclick="clearSelections();">Clear</button>
+</div>
+</div>
+
 
 <div class="selectrow">
   <div class="icon"><img src="images/campfire.svg" class="selecticon"></div>

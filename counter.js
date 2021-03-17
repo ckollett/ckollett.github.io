@@ -308,3 +308,31 @@ function clearSelections() {
     document.getElementById("tilerow").innerHTML = "";
     document.getElementById("output").innerHTML = "";    
 }
+
+function countRandomHand() {
+    clearSelections();
+    let handIndexes = getRandomHand();
+    for (let idx of handIndexes) {
+        let suitIdx = Math.floor(idx/13);
+        let value = idx % 13;
+        
+        let suitElts = document.querySelectorAll("div.selectrow div.selectarea");
+        let suitElt = suitElts.item(suitIdx);
+        let itemElts = suitElt.getElementsByClassName("num");
+        let itemElt = itemElts.item(value);
+        toggleSelection(itemElt);
+    }
+    
+}
+
+function getRandomHand() {
+    let selected = [];
+    let swapped = {};
+    
+    for (let i = 52; i > 47; i--) {
+        let r = Math.floor(i * Math.random());
+        selected.push(swapped[r] ? swapped[r] : r);
+        swapped[r] = swapped[i-1] ? swapped[i-1] : i-1;
+    }
+    return selected;
+}
