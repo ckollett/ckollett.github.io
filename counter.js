@@ -73,7 +73,7 @@ function score(values) {
     // TODO: Is there a better way to do this?
     let uncountedTuples = tuples.filter(tuple => !tuple.hasRunOrFifteen);
     for (let tuple of uncountedTuples) {
-        things.push(new Thing([tuple]));
+        things.push(new Thing([tuple], true));
     }
         
     let total = 0;
@@ -109,14 +109,14 @@ function findTuples(values) {
             count++;
         } else {
             if (count > 1) {
-                tuples.push({"value" : currentValue, "count" : count, "hasRunOrFifteen" : false});
+                tuples.push(new Tuple(currentValue, count));
             }
             currentValue = value;
             count = 1;
         }
     }
     if (count > 1) {
-        tuples.push({"value" : currentValue, "count" : count, "hasRunOrFifteen" : false});
+        tuples.push(new Tuple(currentValue, count));
     }
     
     return tuples;
@@ -180,7 +180,8 @@ function findRun(values) {
 }
 
 function getThingForTuples(runsAndFifteens, tuples) {
-    let thing = new Thing(tuples);
+    let minusThePair = tuples.length === 1 && tuples[0].isInThing;
+    let thing = new Thing(tuples, minusThePair);
     for (let runOrFifteen of runsAndFifteens) {
         if (isInThing(runOrFifteen.values, tuples)) {
             thing.runsAndFifteens.push(runOrFifteen);
@@ -210,11 +211,24 @@ function choose(n, k) {
     return (n * choose(n - 1, k - 1)) / k;
 }
 
+class Tuple {
+    hasRunOrFifteen = false;
+    isInThing = false;
+    
+    constructor(value, count) {
+        this.value = value;
+        this.count = count;
+    }
+}
+
 class Thing {
-    constructor (tuples) {
+    constructor (tuples, minusThePair) {
         this.tuples = tuples;
+        for (let tuple of tuples) {
+            tuple.isInThing = true;
+        }
         this.runsAndFifteens = [];
-        this.minusThePair = false;
+        this.minusThePair = minusThePair;
         this.remaining = [];
     }
     
@@ -229,6 +243,10 @@ class Thing {
             name += this.getTupleName();
         } else {
             name += this.getThingName();
+        }
+
+        if (this.minusThePair) {
+            name += " minus the pair";
         }
         
         name += " for " + this.getScore();
@@ -281,6 +299,7 @@ class Thing {
             output += ")";
         }
         output += "-thing";
+        
         return output;       
     }
     
@@ -290,6 +309,7 @@ class Thing {
         for (let runOrFifteen of this.runsAndFifteens) {
             score1 += runOrFifteen.values.length;
         }
+        
         for (let tuple of this.tuples) {
             score1 *= tuple.count;
             if (!this.minusThePair) {
