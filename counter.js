@@ -73,7 +73,7 @@ function score(values) {
     // TODO: Is there a better way to do this?
     let uncountedTuples = tuples.filter(tuple => !tuple.hasRunOrFifteen);
     for (let tuple of uncountedTuples) {
-        things.push(new Thing([tuple], true));
+        things.push(new Thing([tuple]));
     }
         
     let total = 0;
