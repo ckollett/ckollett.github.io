@@ -45,37 +45,29 @@ function score(values) {
     values.sort((a,b) => a - b);
     let tuples = findTuples(values);
     let runsAndFifteens = findRunsAndFifteens(values);
-    
-    let toCheck = [];
-    if (tuples.length === 2) {
-        toCheck.push(tuples);
-    }
-    for (let tuple of tuples) {
-        toCheck.push([tuple]);
-    }
-    
+
     let things = [];
-    let remaining = runsAndFifteens.slice();
-    for (let tuplesToCheck of toCheck) {
-        let thing = getThingForTuples(remaining, tuplesToCheck);
-        remaining = thing.remaining;
-        if (thing.runsAndFifteens.length > 0) {
-            things.push(thing);
+    
+    if (tuples.length === 2) {
+        let components = findThingComponents(tuples, runsAndFifteens);
+        if (components.included.length > 0) {
+            things.push(new Thing(tuples, components.included));
+            runsAndFifteens = components.excluded;
         }
     }
-    
-    for (let runOrFifteen of remaining) {
-        let thing = new Thing([]);
-        thing.runsAndFifteens.push(runOrFifteen);
-        things.push(thing);
+
+    for (let tuple of tuples) {
+        let components = findThingComponents([tuple], runsAndFifteens);
+        if (components.included.length > 0 || !tuple.thing) {
+            things.push(new Thing([tuple], components.included));
+        }
+        runsAndFifteens = components.excluded;
+    }
+
+    for (let runOrFifteen of runsAndFifteens) {
+        things.push(new Thing([], [runOrFifteen]));
     }
     
-    // TODO: Is there a better way to do this?
-    let uncountedTuples = tuples.filter(tuple => !tuple.hasRunOrFifteen);
-    for (let tuple of uncountedTuples) {
-        things.push(new Thing([tuple]));
-    }
-        
     let total = 0;
     let output = "<ul>";
     for (let thing of things) {
@@ -179,42 +171,35 @@ function findRun(values) {
     return run.length >= 3 ? {"values" : run, "type" : "run of "} : null;
 }
 
-function getThingForTuples(runsAndFifteens, tuples) {
-    let minusThePair = tuples.length === 1 && tuples[0].isInThing;
-    let thing = new Thing(tuples, minusThePair);
-    for (let runOrFifteen of runsAndFifteens) {
-        if (isInThing(runOrFifteen.values, tuples)) {
-            thing.runsAndFifteens.push(runOrFifteen);
-        } else {
-            thing.remaining.push(runOrFifteen);
-        }
-    }
-    return thing;
+function choose(n, k) {
+    if (k === 0 || n === 0) return 1;
+    return (n * choose(n - 1, k - 1)) / k;
 }
 
-function isInThing(values, tuples) {
-    var multipliers = [];
+function findThingComponents(tuples, runsAndFifteens) {
+    let components = {"included" : [], "excluded" : []};
+    for (let runAndFifteen of runsAndFifteens) {
+        if (isInThing(tuples, runAndFifteen.values)) {
+            components.included.push(runAndFifteen);
+        } else {
+            components.excluded.push(runAndFifteen);
+        }
+    }
+    return components;
+}
+
+function isInThing(tuples, values) {
     for (let tuple of tuples) {
         var fromTuple = values.filter(a => a === tuple.value);
         var tupleMultiplier = choose(tuple.count, fromTuple.length);
-        if (tupleMultiplier > 1) {
-            tuple.hasRunOrFifteen = true;
-        } else {
+        if (tupleMultiplier <= 1) {
             return false;
         }
     }
     return true;
 }
 
-function choose(n, k) {
-    if (k === 0 || n === 0) return 1;
-    return (n * choose(n - 1, k - 1)) / k;
-}
-
 class Tuple {
-    hasRunOrFifteen = false;
-    isInThing = false;
-    
     constructor(value, count) {
         this.value = value;
         this.count = count;
@@ -222,14 +207,14 @@ class Tuple {
 }
 
 class Thing {
-    constructor (tuples, minusThePair) {
+    constructor(tuples, runsAndFifteens) {
         this.tuples = tuples;
+        this.runsAndFifteens = runsAndFifteens;
         for (let tuple of tuples) {
-            tuple.isInThing = true;
+            if (!tuple.thing) {
+                tuple.thing = this;
+            }
         }
-        this.runsAndFifteens = [];
-        this.minusThePair = minusThePair;
-        this.remaining = [];
     }
     
     toString() {
@@ -245,7 +230,7 @@ class Thing {
             name += this.getThingName();
         }
 
-        if (this.minusThePair) {
+        if (this.tuples.length === 1 && this.tuples[0].thing != this) {
             name += " minus the pair";
         }
         
@@ -264,8 +249,7 @@ class Thing {
     getTupleName() {
         let name = "";
         for (let tuple of this.tuples) {
-            let tupled = this.runsAndFifteens[0].values.filter(value => value === tuple.value);
-            let n = choose(tuple.count, tupled.length);
+            let n = this.getTupleMultiplier(tuple);
             switch (n) {
                 case 2 : name += "double "; break;
                 case 3 : name += "triple "; break;
@@ -311,12 +295,20 @@ class Thing {
         }
         
         for (let tuple of this.tuples) {
-            score1 *= tuple.count;
-            if (!this.minusThePair) {
+            if (score1 > 0) {
+                score1 *= this.getTupleMultiplier(tuple);
+            }
+            
+            if (tuple.thing === this) {
                 score2 += 2 * choose(tuple.count, 2);
             }
         }
         return score1 + score2;
+    }
+    
+    getTupleMultiplier(tuple) {
+        let tupled = this.runsAndFifteens[0].values.filter(value => value === tuple.value);
+        return choose(tuple.count, tupled.length);
     }
 }
 
