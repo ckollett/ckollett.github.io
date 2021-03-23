@@ -9,25 +9,19 @@ function toggleSelection(elt) {
         elt.classList.remove("selected");
     }
     
-    let suit = elt.closest('.selectarea').getAttribute('data-suit');
-    let value = elt.innerHTML;
-    let tileId = suit + "_" + value;
     if (added) {
-        let newTile = document.createElement('div');
-        newTile.id = tileId;
-        newTile.classList.add(suit);
-        newTile.classList.add('tile');
-        let valueElt = document.createElement('div');
-        valueElt.classList.add('value');
-        valueElt.innerHTML = value;
-        newTile.appendChild(valueElt);
-        document.getElementById('tilerow').appendChild(newTile);
+        addTileForSelectedElement(elt);
     } else {
+        let suit = elt.closest('.selectarea').getAttribute('data-suit');
+        let value = elt.innerHTML;
+        let tileId = suit + "_" + value;
         let toRemove = document.getElementById(tileId);
         if (toRemove) {
             toRemove.remove();
         }
     }
+    
+    updateHash();
     
     if (selectedElts.length === 5) {
         let cards = [];
@@ -38,6 +32,48 @@ function toggleSelection(elt) {
     } else {
         document.getElementById("output").innerHTML = "";
     }
+}
+
+function addTileForSelectedElement(elt) {
+    let suit = elt.closest('.selectarea').getAttribute('data-suit');
+    let value = elt.innerHTML;
+    let tileId = suit + "_" + value;
+    let newTile = document.createElement('div');
+    newTile.id = tileId;
+    newTile.classList.add(suit);
+    newTile.classList.add('tile');
+    let valueElt = document.createElement('div');
+    valueElt.classList.add('value');
+    valueElt.innerHTML = value;
+    newTile.appendChild(valueElt);
+    newTile.setAttribute("data-hash", elt.id)
+    document.getElementById('tilerow').appendChild(newTile);
+}
+
+function selectFromHash() {
+    let hash = document.location.hash;
+    if (hash.length > 1 && hash.charAt(0) === '#') {
+        hash = hash.substring(1);
+    }
+    if (hash.trim().length === 0) {
+        return;
+    }
+    
+    let tiles = hash.matchAll(/[cmst][^cmst]+/g);
+    for (let tile of tiles) {
+        let selectedElt = document.getElementById(tile[0]);
+        selectedElt.classList.add('selected');
+        addTileForSelectedElement(selectedElt);
+    }
+}
+
+function updateHash() {
+    let selectedElts = document.getElementsByClassName("tile");
+    let hash = "";
+    for (let elt of selectedElts) {
+        hash += elt.getAttribute("data-hash");
+    }
+    document.location.hash = hash;
 }
 
 function score(values) {
@@ -327,7 +363,8 @@ function clearSelections() {
         selected.classList.remove("selected");
     }
     document.getElementById("tilerow").innerHTML = "";
-    document.getElementById("output").innerHTML = "";    
+    document.getElementById("output").innerHTML = "";   
+    updateHash();
 }
 
 function countRandomHand() {
