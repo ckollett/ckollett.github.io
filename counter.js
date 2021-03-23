@@ -409,7 +409,7 @@ function getRandomHand() {
 function findMonster() {
     let score = countRandomHand();
     if (score >= 15) {
-        done = true;
+        updateHash();
     } else {
         setTimeout(findMonster, 180);
     }
