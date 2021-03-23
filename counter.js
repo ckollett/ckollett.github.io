@@ -1,4 +1,10 @@
 function toggleSelection(elt) {
+    doToggle(elt);
+    countIfHandSelected();
+    updateHash();
+}
+
+function doToggle(elt) {
     let selectedElts = document.getElementsByClassName("selected");
     
     let added = false;
@@ -20,9 +26,7 @@ function toggleSelection(elt) {
             toRemove.remove();
         }
     }
-    
-    countIfHandSelected();
-    updateHash();
+        
 }
 
 function countIfHandSelected() {
@@ -32,9 +36,10 @@ function countIfHandSelected() {
         for (let selected of selectedElts) {
             cards.push(selected.innerHTML);
         }
-        score(cards);
+        return score(cards);
     } else {
         document.getElementById("output").innerHTML = "";
+        return 0;
     }    
 }
 
@@ -127,6 +132,7 @@ function score(values) {
     output += "</ul>";
     output = "Total: " + total + output;
     document.getElementById("output").innerHTML = output;
+    return total;
 }
 
 function fixValues(nums) {
@@ -383,9 +389,9 @@ function countRandomHand() {
         let suitElt = suitElts.item(suitIdx);
         let itemElts = suitElt.getElementsByClassName("num");
         let itemElt = itemElts.item(value);
-        toggleSelection(itemElt);
+        doToggle(itemElt);
     }
-    
+    return countIfHandSelected();
 }
 
 function getRandomHand() {
@@ -398,4 +404,13 @@ function getRandomHand() {
         swapped[r] = swapped[i-1] ? swapped[i-1] : i-1;
     }
     return selected;
+}
+
+function findMonster() {
+    let score = countRandomHand();
+    if (score >= 15) {
+        done = true;
+    } else {
+        setTimeout(findMonster, 100);
+    }
 }
