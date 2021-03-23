@@ -48,6 +48,9 @@ function score(values) {
 
     let things = [];
     
+    // First look for a thing that contains two tuples.
+    // e.g. 4 4 5 6 6 is a single thing containing both the
+    // pair of fours and the pair of sixes.
     if (tuples.length === 2) {
         let components = findThingComponents(tuples, runsAndFifteens);
         if (components.included.length > 0) {
@@ -55,15 +58,21 @@ function score(values) {
             runsAndFifteens = components.excluded;
         }
     }
-
+    
+    
+    // Now look at each tuple individually.
     for (let tuple of tuples) {
         let components = findThingComponents([tuple], runsAndFifteens);
+        // Add it if it's a thing OR if the tuple isn't already part of
+        // a thing. This is how we count pairs that aren't part of tuples.
         if (components.included.length > 0 || !tuple.thing) {
             things.push(new Thing([tuple], components.included));
         }
         runsAndFifteens = components.excluded;
     }
 
+    // If there are any runs or fifteens left over, put each one in 
+    // its own thing with no tuples.
     for (let runOrFifteen of runsAndFifteens) {
         things.push(new Thing([], [runOrFifteen]));
     }
