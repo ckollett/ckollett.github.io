@@ -411,6 +411,6 @@ function findMonster() {
     if (score >= 15) {
         done = true;
     } else {
-        setTimeout(findMonster, 100);
+        setTimeout(findMonster, 180);
     }
 }
