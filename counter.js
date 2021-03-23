@@ -21,8 +21,12 @@ function toggleSelection(elt) {
         }
     }
     
+    countIfHandSelected();
     updateHash();
-    
+}
+
+function countIfHandSelected() {
+    let selectedElts = document.getElementsByClassName("selected");
     if (selectedElts.length === 5) {
         let cards = [];
         for (let selected of selectedElts) {
@@ -31,7 +35,7 @@ function toggleSelection(elt) {
         score(cards);
     } else {
         document.getElementById("output").innerHTML = "";
-    }
+    }    
 }
 
 function addTileForSelectedElement(elt) {
@@ -65,6 +69,7 @@ function selectFromHash() {
         selectedElt.classList.add('selected');
         addTileForSelectedElement(selectedElt);
     }
+    countIfHandSelected();
 }
 
 function updateHash() {
