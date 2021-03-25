@@ -1,46 +1,32 @@
 function toggleSelection(elt) {
-    doToggle(elt);
-    countIfHandSelected();
-    updateHash();
-}
-
-function doToggle(elt) {
-    let selectedElts = document.getElementsByClassName("selected");
-    
-    let added = false;
-    if (selectedElts.length < 5) {
-        added = elt.classList.toggle("selected");
-    } else {
-        // If there are already 5 selected allow deselection only.
-        elt.classList.remove("selected");
+    // Disallow selection of more than 5.
+    let hashParts = splitHash(document.location.hash);
+    if (hashParts.length >= 5 && !elt.classList.contains("selected")) {
+        return;
     }
     
-    if (added) {
-        addTileForSelectedElement(elt);
+    let selected = elt.classList.toggle("selected");
+    let tileId = elt.id;
+    if (selected) {
+        addToHash(tileId);
     } else {
-        let suit = elt.closest('.selectarea').getAttribute('data-suit');
-        let value = elt.innerHTML;
-        let tileId = suit + "_" + value;
-        let toRemove = document.getElementById(tileId);
-        if (toRemove) {
-            toRemove.remove();
-        }
+        removeFromHash(tileId);
     }
-        
+    selectFromHash();
 }
 
-function countIfHandSelected() {
-    let selectedElts = document.getElementsByClassName("selected");
-    if (selectedElts.length === 5) {
-        let cards = [];
-        for (let selected of selectedElts) {
-            cards.push(selected.innerHTML);
-        }
-        return score(cards);
+function countIfHandSelected(tiles) {
+    if (tiles.length === 5) {
+        let scoringGroups = scoreHand(tiles);
+        let output = getScoreOutput(scoringGroups);
+        document.getElementById("output").innerHTML = output;
     } else {
         document.getElementById("output").innerHTML = "";
-        return 0;
     }    
+}
+
+function getTileForElt(elt) {
+    return fromShortHand(elt.id);
 }
 
 function addTileForSelectedElement(elt) {
@@ -60,7 +46,9 @@ function addTileForSelectedElement(elt) {
 }
 
 function selectFromHash() {
+    clearSelections();
     let hash = document.location.hash;
+    document.getElementById('tilerow').innerHTML = "";
     if (hash.length > 1 && hash.charAt(0) === '#') {
         hash = hash.substring(1);
     }
@@ -68,25 +56,138 @@ function selectFromHash() {
         return;
     }
     
-    let tiles = hash.matchAll(/[cmst][^cmst]+/g);
-    for (let tile of tiles) {
-        let selectedElt = document.getElementById(tile[0]);
+    let tiles = [];
+    let tileIds = splitHash(hash);
+    for (let tileId of tileIds) {
+        let selectedElt = document.getElementById(tileId);
         selectedElt.classList.add('selected');
         addTileForSelectedElement(selectedElt);
+        tiles.push(fromShortHand(tileId));
     }
-    countIfHandSelected();
+    countIfHandSelected(tiles);
 }
 
-function updateHash() {
-    let selectedElts = document.getElementsByClassName("tile");
-    let hash = "";
-    for (let elt of selectedElts) {
-        hash += elt.getAttribute("data-hash");
-    }
-    document.location.hash = hash;
+function splitHash(hash) {
+    let result = hash.match(/[cmst][^cmst]+/g);
+    return result || [];
 }
 
-function score(values) {
+function removeFromHash(tileId) {
+    let newHash = "";
+    let hashParts = splitHash(document.location.hash);
+    for (let hashPart of hashParts) {
+        if (hashPart !== tileId) {
+            newHash += hashPart;
+        }
+    }
+    document.location.hash = newHash;
+}
+
+function addToHash(tileId) {
+    document.location.hash += tileId;
+}
+
+function updateHash(hand) {
+    document.location.hash = getHandShortHand(hand);
+}
+
+function scoreHand(hand) {
+    let values = [];
+    let suits = [];
+    for (let tile of hand) {
+        values.push(tile.value);
+        suits.push(tile.suit);
+    }
+    
+    let scoringGroups = findThings(values);
+    let flush = findFlush(suits);
+    if (flush) {
+        scoringGroups.push(flush);
+    }
+    let nobs = findNobs(hand);
+    if (nobs) {
+        scoringGroups.push(nobs);
+    }
+    
+    return scoringGroups;
+}
+
+function findNobs(hand) {
+    let jackSuits = new Set();
+    for (let i = 0; i < hand.length-1; i++) {
+        let tile = hand[i];
+        if (tile.value === 'J') {
+            jackSuits.add(tile.suit);
+        }
+    }
+    
+    let turnSuit = hand[hand.length-1].suit;
+    if (jackSuits.has(turnSuit)) {
+        return new Nobs(turnSuit);
+    } else {
+        return null;
+    }
+}
+
+function findFlush(suits) {
+    let flushSuit = null;
+    let max = 0;
+    let counts = {};
+    for (let suit of suits) {
+        if (counts[suit]) {
+            counts[suit]++;
+        } else {
+            counts[suit] = 1;
+        }
+        if (counts[suit] >= 4) {
+            flushSuit = suit;
+        }
+    }
+    
+    return flushSuit ? new Flush(flushSuit, counts[flushSuit]) : null;
+}
+
+class Flush {
+    constructor(suit, num) {
+        this.suit = suit;
+        this.num = num;
+    }
+    
+    getScore() {
+        return this.num;
+    }
+    
+    getName() {
+        let score = " for " + this.num;
+        switch (this.suit) {
+            case "campfire" : return "Bonfire" + score;
+            case "tent" : return "Group site" + score;
+            case "sleepingbag" : return "Slumber party" + score;
+            case "mug" : return "Coffee shop" + score;
+        }
+    }
+}
+
+class Nobs {
+    constructor(suit) {
+        this.suit = suit;
+    }
+    
+    getScore() {
+        return 1;
+    }
+    
+    getName() {
+        let score = " for 1";
+        switch (this.suit) {
+            case "mug" : return "Joe" + score;
+            case "campfire" : return "James" + score;
+            default : return "Matching Jack (" + this.suit + ")" + score;
+        }
+    }
+}
+
+function findThings(values) {
     values = fixValues(values);
     values.sort((a,b) => a - b);
     let tuples = findTuples(values);
@@ -123,16 +224,25 @@ function score(values) {
         things.push(new Thing([], [runOrFifteen]));
     }
     
+    return things;
+}
+    
+function getTotal(things) {
     let total = 0;
-    let output = "<ul>";
     for (let thing of things) {
-        output += "<li>" + thing.toString() + "</lu>";
         total += thing.getScore();
     }
-    output += "</ul>";
-    output = "Total: " + total + output;
-    document.getElementById("output").innerHTML = output;
     return total;
+}    
+    
+function getScoreOutput(scoringGroups) {    
+    let output = "Total: " + getTotal(scoringGroups);
+    output += "<ul>";
+    for (let group of scoringGroups) {
+        output += "<li>" + group.getName() + "</lu>";
+    }
+    output += "</ul>";
+    return output;
 }
 
 function fixValues(nums) {
@@ -273,7 +383,7 @@ class Thing {
         }
     }
     
-    toString() {
+    getName() {
         this.tuples.sort((a,b) => b.count - a.count);
         this.runsAndFifteens.sort((a,b) => b.values.length - a.values.length);
         
@@ -368,6 +478,11 @@ class Thing {
     }
 }
 
+function doClear() {
+    document.location.hash = "";
+    selectFromHash();
+}
+
 function clearSelections() {
     let selectedNums = document.querySelectorAll("div.num.selected");
     for (let selected of selectedNums) {
@@ -375,26 +490,74 @@ function clearSelections() {
     }
     document.getElementById("tilerow").innerHTML = "";
     document.getElementById("output").innerHTML = "";   
-    updateHash();
 }
 
 function countRandomHand() {
+    let hand = getRandomHand();
+    let hash = getHandShortHand(hand);
+    document.location.hash = hash;
+    selectFromHash();
+    let scoringGroups = scoreHand(hand);
+    return getTotal(scoringGroups);
+}
+
+function selectHand(hand) {
     clearSelections();
-    let handIndexes = getRandomHand();
-    for (let idx of handIndexes) {
-        let suitIdx = Math.floor(idx/13);
-        let value = idx % 13;
-        
-        let suitElts = document.querySelectorAll("div.selectrow div.selectarea");
-        let suitElt = suitElts.item(suitIdx);
-        let itemElts = suitElt.getElementsByClassName("num");
-        let itemElt = itemElts.item(value);
-        doToggle(itemElt);
+    for (let tile of hand) {
+        let id = getTileShortHand(tile);
+        doToggle(document.getElementById(id));
     }
-    return countIfHandSelected();
+}
+
+function getHandShortHand(hand) {
+    let output = "";
+    for (let tile of hand) {
+        output += getTileShortHand(tile);
+    }
+    return output;
+}
+
+function getTileShortHand(tile) {
+    return tile.suit.charAt(0) + tile.value;
+}
+
+function fromShortHand(shortHand) {
+    let suits = ["campfire","mug","sleepingbag","tent"];
+    let suitStr = shortHand.charAt(0);
+    for (let suit of suits) {
+        if (suit.charAt(0) === suitStr) {
+            suitStr = suit;
+            break;
+        }
+    }
+    let value = shortHand.substring(1);
+    return {"suit" : suitStr, "value" : value};
 }
 
 function getRandomHand() {
+    let suits = ["campfire","mug","sleepingbag","tent"];
+    let hand = [];
+    let handIndexes = getRandomIndexes();
+    for (let idx of handIndexes) {
+        let suitIdx = Math.floor(idx/13);
+        let suit = suits[suitIdx];
+        let value = getTileValue(idx);
+        hand.push({"suit" : suit, "value" : value});
+    }
+    return hand;
+}
+
+function getTileValue(idx) {
+    let value = idx % 13 + 1;
+    switch (value) {
+        case 11 : return "J";
+        case 12 : return "Q";
+        case 13 : return "K";
+        default : return value.toString();
+    }
+}
+
+function getRandomIndexes() {
     let selected = [];
     let swapped = {};
     
@@ -407,10 +570,8 @@ function getRandomHand() {
 }
 
 function findMonster() {
-    let score = countRandomHand();
-    if (score >= 15) {
-        updateHash();
-    } else {
+    let total = countRandomHand();
+    if (total < 15) {
         setTimeout(findMonster, 180);
     }
 }

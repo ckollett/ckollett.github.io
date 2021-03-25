@@ -22,14 +22,14 @@ window.setInterval(updateIcon, 5000);
 <div id="buttons">
 <button onclick="findMonster();">Monster</button>
 <button onclick="countRandomHand();">Random</button>
-<button onclick="clearSelections();">Clear</button>
+<button onclick="doClear();">Clear</button>
 </div>
 </div>
 
 
 <div class="selectrow">
   <div class="icon"><img src="images/campfire.svg" class="selecticon"></div>
-  <div class="selectarea" data-suit="campfire">
+  <div class="selectarea" id="campfire_row" data-suit="campfire">
     <div class="num" id="c1" onclick="toggleSelection(this);">1</div>
     <div class="num" id="c2" onclick="toggleSelection(this);">2</div>
     <div class="num" id="c3" onclick="toggleSelection(this);">3</div>
@@ -47,7 +47,7 @@ window.setInterval(updateIcon, 5000);
 </div>
 <div class="selectrow">
   <div class="icon"><img src="images/mug.svg" class="selecticon"></div>
-  <div class="selectarea" data-suit="mug">
+  <div class="selectarea" id="mug_row" data-suit="mug">
     <div class="num" id="m1" onclick="toggleSelection(this);">1</div>
     <div class="num" id="m2" onclick="toggleSelection(this);">2</div>
     <div class="num" id="m3" onclick="toggleSelection(this);">3</div>
@@ -65,7 +65,7 @@ window.setInterval(updateIcon, 5000);
 </div>
 <div class="selectrow">
   <div class="icon"><img src="images/sleepingbag.svg" class="selecticon"></div>
-  <div class="selectarea" data-suit="sleepingbag">
+  <div class="selectarea" id="sleepingbag_row" data-suit="sleepingbag">
     <div class="num" id="s1" onclick="toggleSelection(this);">1</div>
     <div class="num" id="s2" onclick="toggleSelection(this);">2</div>
     <div class="num" id="s3" onclick="toggleSelection(this);">3</div>
@@ -83,7 +83,7 @@ window.setInterval(updateIcon, 5000);
 </div>
 <div class="selectrow">
   <div class="icon"><img src="images/tent.svg" class="selecticon"></div>
-  <div class="selectarea" data-suit="tent">
+  <div class="selectarea" id="tent_row" data-suit="tent">
     <div class="num" id="t1" onclick="toggleSelection(this);">1</div>
     <div class="num" id="t2" onclick="toggleSelection(this);">2</div>
     <div class="num" id="t3" onclick="toggleSelection(this);">3</div>
