@@ -523,7 +523,7 @@ function getTileShortHand(tile) {
 
 function getHandFromShortHand(shortHand) {
     let tiles = [];
-    let tileIds = splitHash(hash);
+    let tileIds = splitHash(shortHand);
     for (let tileId of tileIds) {
         tiles.push(fromShortHand(tileId));
     }
