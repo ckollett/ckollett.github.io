@@ -525,7 +525,7 @@ function getHandFromShortHand(shortHand) {
     let tiles = [];
     let tileIds = splitHash(hash);
     for (let tileId of tileIds) {
-        tiles.push(fromShortHand(tileId);
+        tiles.push(fromShortHand(tileId));
     }
     return tiles;
 }
