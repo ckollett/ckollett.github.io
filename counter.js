@@ -521,6 +521,15 @@ function getTileShortHand(tile) {
     return tile.suit.charAt(0) + tile.value;
 }
 
+function getHandFromShortHand(shortHand) {
+    let tiles = [];
+    let tileIds = splitHash(hash);
+    for (let tileId of tileIds) {
+        tiles.push(fromShortHand(tileId);
+    }
+    return tiles;
+}
+
 function fromShortHand(shortHand) {
     let suits = ["campfire","mug","sleepingbag","tent"];
     let suitStr = shortHand.charAt(0);
