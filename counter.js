@@ -493,6 +493,10 @@ class Thing {
             numTiles += tuple.count;
         }
         if (this.runsAndFifteens.length === 1) {
+            let runOrFifteen = this.runsAndFifteens[0];
+            if (runOrFifteen.values.length > 2) {
+                return false;
+            }
             this.runsAndFifteens[0].values.forEach(item => allValues.add(item));
             numTiles += 2 - this.tuples.length;
         }
