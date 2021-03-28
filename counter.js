@@ -388,12 +388,15 @@ class Thing {
         this.runsAndFifteens.sort((a,b) => b.values.length - a.values.length);
         
         let name = "";
-        if (this.runsAndFifteens.length === 0) {
-            name += this.getPairName();
+        let msAndNsName = this.getMsAndNsName();
+        if (msAndNsName) {
+            name = msAndNsName;
+        } else if (this.runsAndFifteens.length === 0) {
+            name = this.getPairName();
         } else if (this.runsAndFifteens.length === 1) {
-            name += this.getTupleName();
+            name = this.getTupleName();
         } else {
-            name += this.getThingName();
+            name = this.getThingName();
         }
 
         if (this.tuples.length === 1 && this.tuples[0].thing != this) {
@@ -405,7 +408,8 @@ class Thing {
     }
     
     getPairName() {
-        switch (this.tuples[0].count) {
+        let numTiles = this.tuples[0].count;
+        switch (numTiles) {
             case 2 : return "pair";
             case 3 : return "pair royal";
             case 4 : return "double pair royal";
@@ -475,6 +479,32 @@ class Thing {
     getTupleMultiplier(tuple) {
         let tupled = this.runsAndFifteens[0].values.filter(value => value === tuple.value);
         return choose(tuple.count, tupled.length);
+    }
+    
+    getMsAndNsName() {
+        let numTiles = 0;
+        if (this.runsAndFifteens.length > 1) {
+            return false;
+        }
+        
+        let allValues = new Set();
+        for (let tuple of this.tuples) {
+            allValues.add(tuple.value);
+            numTiles += tuple.count;
+        }
+        if (this.runsAndFifteens.length === 1) {
+            this.runsAndFifteens[0].values.forEach(item => allValues.add(item));
+            numTiles += 2 - this.tuples.length;
+        }
+        if (allValues.size <= 2) {                        
+            switch (allValues.values().next().value) {
+                case 6 :
+                case 9 : return "" + numTiles + " nines and sixes";
+                case 7 :
+                case 8 : return "" + numTiles + " eights and sevens";
+            }
+        }
+        return null;
     }
 }
 
