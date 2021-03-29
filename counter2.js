@@ -6,33 +6,77 @@ function scoreHand(tiles) {
 function scoreValues(values) {
     values.sort();
     
-    let toScore = [];
+    let allComponents = [];
     let tuples = findTuples(values);
-    toScore = toScore.concat(tuples);
+    allComponents = allComponents.concat(tuples);
     
     let scoringGroups = findRunsAndFifteens(values);
-    toScore = toScore.concat(tuples);
+    allComponents = allComponents.concat(scoringGroups);
+    
+    // After creating the tupled groups we should be able to count the same score
+    // after each step.
+    let scores = {};
+    scores.simpleCount = countTuplesAndGroups(tuples, scoringGroups);
     
     let tupledGroups = findTupledGroups(tuples, scoringGroups);
-    toScore = toScore.concat(tupledGroups);
+    allComponents = allComponents.concat(tupledGroups);
     
     let things = findThings(tuples, tupledGroups);
-    toScore = toScore.concat(things);
-    if (things.length > 1) {
-        toScore.push(new CompoundThing(things));
-    } else if (things.length === 1) {
-        let utg = tupledGroups.filter(tg => !tg.consumed);
-        if (utg.length === 1) {
-            toScore.push(new PartialCompoundThing(things[0], utg[0]));
-        }
+    allComponents = allComponents.concat(things);
+    let merged = attemptMerge(things, tupledGroups.filter(tg => !tg.consumed));
+    if (merged) {
+        allComponents.push(merged);
     }
-
     
-    toScore = toScore.filter(item => !item.consumed);
+    // Once all components are merged we can use the count function,
+    // since all of the minus-a-pair situations from things are resolved.
+    scores.afterMerge = count(allComponents);
+    scores.afterMergeFormula = countByFormula(allComponents);
     
-    for (let s of toScore) {
+    allComponents = allComponents.filter(item => !item.consumed);
+    
+    for (let s of allComponents) {
         console.log(s.getName());
         console.log("    " + s.getFormula());
+    }
+    
+    console.log(scores);
+}
+
+function countTuplesAndGroups(tuples, groups) {
+    let score = 0;
+    for (let tuple of tuples) {
+        score += tuple.getScore();
+    }
+    
+    for (let group of groups) {
+        score += group.getScore() * group.getTotalTupleCount(tuples);
+    }
+    return score;
+}
+
+function count(resolvedComponents) {
+    let toScore = resolvedComponents.filter(comp => !comp.consumed);
+    let score = 0;
+    toScore.forEach(comp => score += comp.getScore());
+    return score;
+}
+
+function countByFormula(allComponents) {
+    let toScore = allComponents.filter(comp => !comp.consumed);
+    let score = 0;
+    toScore.forEach(comp => score += eval(comp.getFormula()));
+    return score;
+}
+
+function attemptMerge(things, unusedTupleGroups) {
+    // TODO: These should be validated. 
+    // For compound thing, check that the scoring groups actually match.
+    // For partial, check that the unused tuple is actually in the thing correctly.
+    if (things.length > 1) {
+        return new CompoundThing(things);
+    } else if (things.length === 1 && unusedTupleGroups.length === 1) {
+        return new PartialCompoundThing(things[0], unusedTupleGroups[0]);
     }
 }
 
@@ -151,21 +195,18 @@ class Scorable {
         this.getOutsideParens().forEach(outside => formula += " * " + outside);
         return formula;
     }
-}
-
-class CompoundScorable extends Scorable {
+    
     getInsideParens() {
-        let inside = [];
-        let comp = this.getComponents();
-        comp.forEach(c => inside = inside.concat(c.getInsideParens()));
-        return inside;
+        return [];
     }
     
     getOutsideParens() {
-        let outside = [];
-        this.getComponents().forEach(c => outside = outside.concat(c.getOutsideParens()));
-        return outside;
-    }    
+        return [];
+    }
+    
+    getScore() {
+        return 0;
+    }
 }
 
 // A tuple is a repeated tile value within a hand
@@ -194,6 +235,11 @@ class Tuple extends Scorable {
     getOutsideParens() {
         return [this.count];
     }
+    
+    getScore() {
+        // (count choose 2) * 2 = count * (count-1)
+        return this.count * (this.count-1);
+    }
 }
 
 // A scoring group is just a run or a fifteen
@@ -211,9 +257,17 @@ class ScoringGroup extends Scorable {
         return name;
     }
 
+    getTotalTupleCount(tuples) {
+        let total = 1;
+        for (let tuple of tuples) {
+            total *= this.getTupleCount(tuple);
+        }
+        return total;
+    }
+
     getTupleCount(tuple) {
         let numUsed = this.values.filter(value => value === tuple.value).length
-        return numUsed > 0 ? choose(tuple.count, numUsed) : 0;
+        return numUsed > 0 ? choose(tuple.count, numUsed) : 1;
     }
     
     getInsideParens() {
@@ -223,11 +277,16 @@ class ScoringGroup extends Scorable {
     getOutsideParens() {
         return [];
     }
+    
+    getScore() {
+        // Atomic!
+        return this.values.length;
+    }
 }
 
 // A tupled group is a scoring group that is counted
 // multiple times because of a tuple.
-class TupledGroup extends CompoundScorable {
+class TupledGroup extends Scorable {
     constructor(tuple, scoringGroup) {
         super();
         this.tuple = tuple;
@@ -248,21 +307,33 @@ class TupledGroup extends CompoundScorable {
         return name + this.scoringGroup.getName();
     }
     
-    getComponents() {
-        return [this.scoringGroup, this.tuple];
+    getInsideParens() {
+        return [this.scoringGroup.values.length, this.tuple.count-1];
+    }
+    
+    getOutsideParens() {
+        return [this.tuple.count];
     }
     
     getTupleCount() {
         return this.scoringGroup.getTupleCount(this.tuple);
     }
+    
+    getScore() {
+        // 1,2,2,3 should be 3*2 + 2
+        // 1,2,2,2,3 should be 3*3 + 6
+        // 4,4,4,4,7 should be 3*6 + 12
+        return this.scoringGroup.getScore() * this.getTupleCount() + this.tuple.getScore();
+    }
 }
 
 // A thing happens when there are multiple tupled groups
 // for the same tuple.
-class Thing extends CompoundScorable {
+class Thing extends Scorable {
     constructor(tuple, tupledGroups) {
         super();
         this.tuple = tuple;
+        this.tupledGroups = tupledGroups;
         this.groups = tupledGroups.map(tupledGroup => tupledGroup.scoringGroup);
         this.groups.sort((a,b) => b.values.length - a.values.length);
         tupledGroups.forEach(tg => tg.consumed = true);
@@ -284,15 +355,27 @@ class Thing extends CompoundScorable {
         return name;
     }
     
-    getComponents() {
-        let components = this.groups.slice();
-        components.push(this.tuple);
-        return components;
+    getInsideParens() {
+        let inside = [];
+        this.groups.forEach(group => inside = inside.concat(group.getInsideParens()));
+        inside = inside.concat(this.tuple.getInsideParens());
+        return inside;
     }
-            
+    
+    getOutsideParens() {
+        return this.tuple.getOutsideParens();
+    }
+    
+    getScore() {
+        let score = 0;
+        // Need tupled groups for this!
+        this.tupledGroups.forEach(tg => score += (tg.getTupleCount() * tg.scoringGroup.getScore()));
+        score += this.tuple.getScore();
+        return score;
+    }
 }
 
-class CompoundThing extends CompoundScorable {
+class CompoundThing extends Scorable {
     constructor(components) {
         super();
         this.components = components;
@@ -310,16 +393,24 @@ class CompoundThing extends CompoundScorable {
         return name;
     }
     
-    getComponents() {
-        return this.components;
+    getInsideParens() {
+        // Ugly...
+        return this.components[0].getInsideParens();
     }
     
-    getInsideParens() {
-        return this.components[0].getInsideParens();
+    getOutsideParens() {
+        let outside = [];
+        this.components.forEach(comp => outside = outside.concat(comp.getOutsideParens()));
+        return outside;
+    }
+    
+    getScore() {
+        let score = 0;
+        this.components.forEach(comp => score += comp.getScore());
     }
 }
 
-class PartialCompoundThing extends CompoundScorable {
+class PartialCompoundThing extends Scorable {
     constructor(thing, tupledGroup) {
         super();
         this.thing = thing;
@@ -330,16 +421,24 @@ class PartialCompoundThing extends CompoundScorable {
     
     getName() {
         // This needs a ton of work.
-        return "(Double " + this.tupledGroup.scoringGroup.values.length + ",2) Thing";
+        let name = "(Double " + this.tupledGroup.scoringGroup.values.length + ",";
+        name += this.thing.getName().substring(1);
+        return name;
     }
     
-    getComponents() {
-        return [this.tupledGroup, this.thing];
+    getInsideParens() {
+        let inside = this.tupledGroup.getInsideParens().slice();
+        inside = inside.concat(this.thing.getInsideParens());
+        return inside;
     }
     
     getOutsideParens() {
         // The pair from the tupled group is accounted for inside
         // the parentheses. Need a better explanation for why this works!
         return this.thing.getOutsideParens();
+    }
+    
+    getScore() {
+        return this.thing.getScore() + this.tupledGroup.getScore();
     }
 }
