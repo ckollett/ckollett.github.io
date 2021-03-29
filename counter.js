@@ -45,14 +45,14 @@ function doClear() {
     selectFromHash();
 }
 
-/* ********** Tile Display ********** */
+/* ********** CounterTile Display ********** */
 function displayTile(tile) {
     let newTile = createTileElt(tile);
     document.getElementById('tilerow').appendChild(newTile);
 }
 
 function removeTile(tile) {
-    if (typeof(tile) === 'Tile') {
+    if (typeof(tile) === 'CounterTile') {
         tile = tile.getId();
     }
     document.getElementById(tile).remove();
@@ -60,7 +60,7 @@ function removeTile(tile) {
 
 function createTileElt(tile) {
     if (typeof(tile) === 'string') {
-        tile = Tile.fromId(tile);
+        tile = CounterTile.fromId(tile);
     }
     
     let newTile = document.createElement('div');
@@ -122,10 +122,10 @@ function createTableRow(scorePart, rowClass) {
 }
 
 
-/* ********** Tile Functions and Class ********** */
+/* ********** CounterTile Functions and Class ********** */
 function getHandFromShortHand(shortHand) {
     let tileIds = splitShortHand(shortHand);
-    return tileIds.map(id => Tile.fromId(id));
+    return tileIds.map(id => CounterTile.fromId(id));
 }
 
 function splitShortHand(shortHand) {
@@ -133,21 +133,21 @@ function splitShortHand(shortHand) {
     return result || [];
 }
 
-class Tile {
+class CounterTile {
     constructor(value, suit) {
-        this.value = Tile.toNumberValue(value);
-        this.suit = Tile.resolveSuit(suit);
+        this.value = CounterTile.toNumberValue(value);
+        this.suit = CounterTile.resolveSuit(suit);
     }
     
     static suits = ["campfire","mug","sleepingbag","tent"];
     
     static fromId(id) {
-        let suit = Tile.resolveSuit(id.charAt(0));
-        return new Tile(id.substring(1), suit);
+        let suit = CounterTile.resolveSuit(id.charAt(0));
+        return new CounterTile(id.substring(1), suit);
     }
     
     static resolveSuit(suit) {
-        for (let s of Tile.suits) {
+        for (let s of CounterTile.suits) {
             if (s.startsWith(suit.toLowerCase())) return s;
         }
     }
@@ -179,7 +179,7 @@ class Tile {
     }
     
     getStringValue() {
-        return Tile.toStringValue(this.value);
+        return CounterTile.toStringValue(this.value);
     }
 }
 
@@ -838,7 +838,7 @@ function getRandomShortHand() {
     for (let idx of handIndexes) {
         let suitIdx = Math.floor(idx/13);
         let suit = suits[suitIdx];
-        let value = Tile.toStringValue(idx % 13 + 1);
+        let value = CounterTile.toStringValue(idx % 13 + 1);
         shortHand += suit + value;
     }
     return shortHand;
