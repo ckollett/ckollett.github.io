@@ -9,6 +9,7 @@ function displayAndScore(tiles) {
     displayTiles(tiles);
     if (tiles.length === 5) {
         let scoreParts = scoreHand(tiles);
+        scoreParts.sort((a,b) => b.priority - a.priority);
         let table = getOutputAsTable(scoreParts);
         document.getElementById('output').innerHTML = table;
         
@@ -412,6 +413,10 @@ function findNobs(hand) {
 /* ********** Scoring Objects ********** */
 
 class Displayable {
+    constructor() {
+        this.priority = 0;
+    }
+    
     getName() {
         return "";
     }
@@ -469,6 +474,7 @@ class Tuple extends Scorable {
         super();
         this.value = value;
         this.count = count;
+        this.priority = 1;
     }
     
     getName() {
@@ -501,6 +507,7 @@ class ScoringGroup extends Scorable {
         super();
         this.values = values;
         this.isRun = isRun;
+        this.priority = 2;
     }
     
     getName() {
@@ -545,6 +552,7 @@ class TupledGroup extends Scorable {
         this.scoringGroup = scoringGroup;
         tuple.consumed = true;
         scoringGroup.consumed = true;
+        this.priority = 3;
     }
     
     getName() {
@@ -590,6 +598,7 @@ class CompoundTupledGroup extends Scorable {
         tupledGroups.forEach(group => group.consumed = true);
         this.scoringGroup = tupledGroups[0].scoringGroup;
         this.tuples = tupledGroups.map(group => group.tuple);
+        this.priority = 4;
     }
     
     getName() {
@@ -634,6 +643,7 @@ class Thing extends Scorable {
         this.groups = tupledGroups.map(tupledGroup => tupledGroup.scoringGroup);
         this.groups.sort((a,b) => b.values.length - a.values.length);
         tupledGroups.forEach(tg => tg.consumed = true);
+        this.priority = 5;
     }
     
     getName() {
@@ -677,6 +687,7 @@ class CompoundThing extends Scorable {
         this.components = components;
         this.components.sort((a,b) => a.tuple.count - b.tuple.count);
         components.forEach(c => c.consumed = true);
+        this.priority = 6;
     }
     
     getName() {
@@ -714,6 +725,7 @@ class PartialCompoundThing extends Scorable {
         this.tupledGroup = tupledGroup;
         thing.consumed = true;
         tupledGroup.consumed = true;
+        this.priority = 6;
     }
     
     getName() {
