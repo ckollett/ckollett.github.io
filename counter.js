@@ -102,9 +102,9 @@ function createHash() {
 
 /* ********** Output ********** */
 function getOutputAsTable(scoreParts) {
-    let table = "<table>";
+    let table = '<table id="pasttable">';
     
-    table += '<tr class="header"><td class="name">Name</td><td class="score">Score</td><td class="formula">Formula</td></tr>';
+    table += '<tr class="pastheader"><td class="pastname">Name</td><td class="pastscore">Score</td><td class="pastformula">Formula</td></tr>';
     for (let part of scoreParts) {
         table += createTableRow(part);
     }
@@ -115,9 +115,9 @@ function getOutputAsTable(scoreParts) {
 
 function createTableRow(scorePart, rowClass) {
     let row = '<tr class="' + (rowClass || "part") + '">';
-    row += '<td class="name">' + scorePart.getName() + '</td>';
-    row += '<td class="score">' + scorePart.getScore() + '</td>';
-    row += '<td class="formula">' + scorePart.getFormula().replaceAll('*','&times') + '</td>';
+    row += '<td class="pastname">' + scorePart.getName() + '</td>';
+    row += '<td class="pastscore">' + scorePart.getScore() + '</td>';
+    row += '<td class="pastformula">' + scorePart.getFormula().replaceAll('*','&times') + '</td>';
     return row + '</tr>';
 }
 

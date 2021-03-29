@@ -138,7 +138,7 @@ table {
     border: 1px solid black;
 }
 
-tr.header td {
+tr.pastheader td {
     background-color:black;
     color:white;
 }
@@ -147,16 +147,16 @@ td {
     padding:2px;
 }
 
-td.name {
+td.pastname {
     min-width:200px;
 }
 
-td.score {
+td.pastscore {
     min-width:80px;
     text-align:center;
 }
 
-td.formula {
+td.pastformula {
     min-width:200px;
     text-align:center;
 }
