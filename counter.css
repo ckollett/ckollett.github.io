@@ -132,3 +132,39 @@ button {
     font-size: 18px;
     outline: 0;
 }
+
+table {
+    border-collapse:collapse;
+    border: 1px solid black;
+}
+
+tr.header td {
+    background-color:black;
+    color:white;
+}
+
+td {
+    padding:2px;
+}
+
+td.name {
+    min-width:200px;
+}
+
+td.score {
+    min-width:80px;
+    text-align:center;
+}
+
+td.formula {
+    min-width:200px;
+    text-align:center;
+}
+
+tr {
+    border-bottom:1px solid black;
+}
+
+tr.total {
+    border-top:2px solid black;
+}

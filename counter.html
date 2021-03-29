@@ -1,9 +1,9 @@
 <html>
 <head>
 <link rel="icon" id="favicon" type="image/svg+xml" href="images/mug.svg" />
-<link rel="stylesheet" href="counter.css?202103280918">
+<link rel="stylesheet" href="counter.css?202103290251">
 <title>Thing Finder</title>
-<script type="text/javascript" src="counter.js?202103280918"></script>
+<script type="text/javascript" src="counter.js?202103290251"></script>
 <script type="text/javascript" >
 currentIcon = 0;
 
@@ -15,13 +15,15 @@ function updateIcon() {
 }
     
 window.setInterval(updateIcon, 5000);
+
+scoreValues([8,7,6,8,6]);
 </script>
 </head>
 <body>
 <div class="header">
 <div id="buttons">
 <button onclick="findMonster();">Monster</button>
-<button onclick="countRandomHand();">Random</button>
+<button onclick="showRandomHand();">Random</button>
 <button onclick="doClear();">Clear</button>
 </div>
 </div>

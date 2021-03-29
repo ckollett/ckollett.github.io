@@ -1,282 +1,307 @@
-function toggleSelection(elt) {
-    // Disallow selection of more than 5.
-    let hashParts = splitHash(document.location.hash);
-    if (hashParts.length >= 5 && !elt.classList.contains("selected")) {
-        return;
-    }
-    
-    let selected = elt.classList.toggle("selected");
-    let tileId = elt.id;
-    if (selected) {
-        addToHash(tileId);
+/* ********** URL Hash ********** */
+function selectFromHash() {
+    let tiles = getHandFromShortHand(document.location.hash);
+    selectTiles(tiles);
+    return displayAndScore(tiles);
+}
+
+function displayAndScore(tiles) {
+    displayTiles(tiles);
+    if (tiles.length === 5) {
+        let scoreParts = scoreHand(tiles);
+        let table = getOutputAsTable(scoreParts);
+        document.getElementById('output').innerHTML = table;
+        
+        let total = new TotalScore(scoreParts);
+        return total.getScore();
     } else {
-        removeFromHash(tileId);
+        document.getElementById('output').innerHTML = '';
+        return 0;
     }
+}
+
+function selectTiles(tiles) {
+    clearSelections();
+    tiles.forEach(tile => document.getElementById(tile.getId()).classList.add('selected'));
+}
+
+function clearSelections() {
+    let selected = document.getElementsByClassName('selected');
+    Array.from(selected).forEach(elt => elt.classList.remove('selected'));
+}
+
+function displayTiles(tiles) {
+    document.getElementById('tilerow').innerHTML = '';
+    tiles.forEach(tile => displayTile(tile));
+}
+
+function updateHash() {
+    document.location.hash = hash;
+}
+
+function doClear() {
+    document.location.hash = '';
     selectFromHash();
 }
 
-function countIfHandSelected(tiles) {
-    if (tiles.length === 5) {
-        let scoringGroups = scoreHand(tiles);
-        let output = getScoreOutput(scoringGroups);
-        document.getElementById("output").innerHTML = output;
-    } else {
-        document.getElementById("output").innerHTML = "";
-    }    
-}
-
-function getTileForElt(elt) {
-    return fromShortHand(elt.id);
-}
-
-function addTileForSelectedElement(elt) {
-    let suit = elt.closest('.selectarea').getAttribute('data-suit');
-    let value = elt.innerHTML;
-    let tileId = suit + "_" + value;
-    let newTile = document.createElement('div');
-    newTile.id = tileId;
-    newTile.classList.add(suit);
-    newTile.classList.add('tile');
-    let valueElt = document.createElement('div');
-    valueElt.classList.add('value');
-    valueElt.innerHTML = value;
-    newTile.appendChild(valueElt);
-    newTile.setAttribute("data-hash", elt.id)
+/* ********** Tile Display ********** */
+function displayTile(tile) {
+    let newTile = createTileElt(tile);
     document.getElementById('tilerow').appendChild(newTile);
 }
 
-function selectFromHash() {
-    clearSelections();
-    let hash = document.location.hash;
-    document.getElementById('tilerow').innerHTML = "";
-    if (hash.length > 1 && hash.charAt(0) === '#') {
-        hash = hash.substring(1);
+function removeTile(tile) {
+    if (typeof(tile) === 'Tile') {
+        tile = tile.getId();
     }
-    if (hash.trim().length === 0) {
+    document.getElementById(tile).remove();
+}
+
+function createTileElt(tile) {
+    if (typeof(tile) === 'string') {
+        tile = Tile.fromId(tile);
+    }
+    
+    let newTile = document.createElement('div');
+    newTile.classList.add(tile.suit);
+    newTile.classList.add('tile');
+    let valueElt = document.createElement('div');
+    valueElt.classList.add('value');
+    valueElt.innerHTML = tile.getStringValue();
+    newTile.appendChild(valueElt);
+    return newTile;
+}
+
+/* ********** Handle Selection ********** */
+function toggleSelection(elt) {
+    let selection = splitShortHand(document.location.hash);
+    if (selection.length >= 5 && !elt.classList.contains('selected')) {
         return;
     }
     
-    let tiles = [];
-    let tileIds = splitHash(hash);
-    for (let tileId of tileIds) {
-        let selectedElt = document.getElementById(tileId);
-        selectedElt.classList.add('selected');
-        addTileForSelectedElement(selectedElt);
-        tiles.push(fromShortHand(tileId));
+    let added = elt.classList.toggle("selected");
+    if (added) {
+        selection.push(elt.id);
+    } else {
+        let eltIdx = selection.indexOf(elt.id);
+        selection.splice(eltIdx, 1);
     }
-    countIfHandSelected(tiles);
+    let newHash = "";
+    selection.forEach(id => newHash += id);
+    document.location.hash = newHash;
+    let hand = getHandFromShortHand(newHash);
+    displayAndScore(hand);
 }
 
-function splitHash(hash) {
-    let result = hash.match(/[cmst][^cmst]+/g);
+function createHash() {
+    let hash = "";
+    let selected = document.getElementsByClassName('selected');
+    Array.from(selected).forEach(elt => hash += elt.id);
+}
+
+/* ********** Output ********** */
+function getOutputAsTable(scoreParts) {
+    let table = "<table>";
+    
+    table += '<tr class="header"><td class="name">Name</td><td class="score">Score</td><td class="formula">Formula</td></tr>';
+    for (let part of scoreParts) {
+        table += createTableRow(part);
+    }
+    table += createTableRow(new TotalScore(scoreParts), "total");
+    
+    return table + "</table>";
+}
+
+function createTableRow(scorePart, rowClass) {
+    let row = '<tr class="' + (rowClass || "part") + '">';
+    row += '<td class="name">' + scorePart.getName() + '</td>';
+    row += '<td class="score">' + scorePart.getScore() + '</td>';
+    row += '<td class="formula">' + scorePart.getFormula().replaceAll('*','&times') + '</td>';
+    return row + '</tr>';
+}
+
+
+/* ********** Tile Functions and Class ********** */
+function getHandFromShortHand(shortHand) {
+    let tileIds = splitShortHand(shortHand);
+    return tileIds.map(id => Tile.fromId(id));
+}
+
+function splitShortHand(shortHand) {
+    let result = shortHand.match(/[cmst][^cmst]+/g);
     return result || [];
 }
 
-function removeFromHash(tileId) {
-    let newHash = "";
-    let hashParts = splitHash(document.location.hash);
-    for (let hashPart of hashParts) {
-        if (hashPart !== tileId) {
-            newHash += hashPart;
-        }
-    }
-    document.location.hash = newHash;
-}
-
-function addToHash(tileId) {
-    document.location.hash += tileId;
-}
-
-function updateHash(hand) {
-    document.location.hash = getHandShortHand(hand);
-}
-
-function scoreHand(hand) {
-    let values = [];
-    let suits = [];
-    for (let tile of hand) {
-        values.push(tile.value);
-        suits.push(tile.suit);
+class Tile {
+    constructor(value, suit) {
+        this.value = Tile.toNumberValue(value);
+        this.suit = Tile.resolveSuit(suit);
     }
     
-    let scoringGroups = findThings(values);
-    let flush = findFlush(suits);
+    static suits = ["campfire","mug","sleepingbag","tent"];
+    
+    static fromId(id) {
+        let suit = Tile.resolveSuit(id.charAt(0));
+        return new Tile(id.substring(1), suit);
+    }
+    
+    static resolveSuit(suit) {
+        for (let s of Tile.suits) {
+            if (s.startsWith(suit.toLowerCase())) return s;
+        }
+    }
+    
+    static toNumberValue(value) {
+        switch (value.toString()) {
+            case 'J' : return 11;
+            case 'Q' : return 12;
+            case 'K' : return 13;
+            default : return parseInt(value);
+        }
+    }
+    
+    static toStringValue(value) {
+        switch (value) {
+            case 11 : return 'J';
+            case 12 : return 'Q';
+            case 13 : return 'K';
+            default : return value.toString();
+        }
+    }
+    
+    getId() {
+        return this.suit.charAt(0) + this.getStringValue();
+    }
+    
+    getNumberValue() {
+        return this.value;
+    }
+    
+    getStringValue() {
+        return Tile.toStringValue(this.value);
+    }
+}
+
+/* ********** Scoring functions ********** */
+function getTotal(scoreParts) {
+    let total = 0;
+    scoreParts.forEach(part => total += part.getScore());
+    return total;
+}
+
+function scoreHand(tiles) {
+    if (typeof(tiles) === 'string') tiles = getHandFromShortHand(tiles);
+    
+    let scores = scoreValues(tiles.map(tile => tile.value));
+    let flush = findFlush(tiles.map(tile => tile.suit));
     if (flush) {
-        scoringGroups.push(flush);
+        scores.push(flush);
     }
-    let nobs = findNobs(hand);
+    let nobs = findNobs(tiles);
     if (nobs) {
-        scoringGroups.push(nobs);
+        scores.push(nobs);
     }
-    
-    return scoringGroups;
+    return scores;
 }
 
-function findNobs(hand) {
-    let jackSuits = new Set();
-    for (let i = 0; i < hand.length-1; i++) {
-        let tile = hand[i];
-        if (tile.value === 'J') {
-            jackSuits.add(tile.suit);
-        }
+function scoreValues(values) {
+    values.sort();
+    
+    let allComponents = [];
+    let tuples = findTuples(values);
+    allComponents = allComponents.concat(tuples);
+    
+    let scoringGroups = findRunsAndFifteens(values);
+    allComponents = allComponents.concat(scoringGroups);
+    
+    // After creating the tupled groups we should be able to count the same score
+    // after each step.
+    let scores = {};
+    scores.simpleCount = countTuplesAndGroups(tuples, scoringGroups);
+    
+    let tupledGroups = findTupledGroups(tuples, scoringGroups);
+    allComponents = allComponents.concat(tupledGroups);
+    
+    let things = findThings(tuples, tupledGroups);
+    allComponents = allComponents.concat(things);
+    let merged = attemptMerge(things, tupledGroups.filter(tg => !tg.consumed));
+    if (merged) {
+        allComponents.push(merged);
     }
     
-    let turnSuit = hand[hand.length-1].suit;
-    if (jackSuits.has(turnSuit)) {
-        return new Nobs(turnSuit);
+    // Once all components are merged we can use the count function,
+    // since all of the minus-a-pair situations from things are resolved.
+    scores.afterMerge = count(allComponents);
+    scores.afterMergeFormula = countByFormula(allComponents);
+    
+    allComponents = allComponents.filter(item => !item.consumed);
+    
+    for (let s of allComponents) {
+        console.log(s.getName());
+        console.log("    " + s.getFormula());
+    }
+    
+    console.log(scores);
+    
+    return allComponents;
+}
+
+function countTuplesAndGroups(tuples, groups) {
+    let score = 0;
+    for (let tuple of tuples) {
+        score += tuple.getScore();
+    }
+    
+    for (let group of groups) {
+        score += group.getScore() * group.getTotalTupleCount(tuples);
+    }
+    return score;
+}
+
+function count(resolvedComponents) {
+    let toScore = resolvedComponents.filter(comp => !comp.consumed);
+    let score = 0;
+    toScore.forEach(comp => score += comp.getScore());
+    return score;
+}
+
+function countByFormula(allComponents) {
+    let toScore = allComponents.filter(comp => !comp.consumed);
+    let score = 0;
+    toScore.forEach(comp => score += eval(comp.getFormula()));
+    return score;
+}
+
+function attemptMerge(things, unusedTupleGroups) {
+    // TODO: These should be validated. 
+    // For compound thing, check that the scoring groups actually match.
+    // For partial, check that the unused tuple is actually in the thing correctly.
+    if (things.length > 1) {
+        return new CompoundThing(things);
+    } else if (things.length === 1 && unusedTupleGroups.length === 1) {
+        return new PartialCompoundThing(things[0], unusedTupleGroups[0]);
+    } else if (things.length === 0 && unusedTupleGroups.length > 1) {
+        let unique = new Set();
+        unusedTupleGroups.forEach(group => unique.add(group.scoringGroup));
+        if (unique.size === 1) {
+            return new CompoundTupledGroup(unusedTupleGroups);
+        }
     } else {
         return null;
     }
 }
 
-function findFlush(suits) {
-    let flushSuit = null;
-    let max = 0;
-    let counts = {};
-    for (let suit of suits) {
-        if (counts[suit]) {
-            counts[suit]++;
-        } else {
-            counts[suit] = 1;
-        }
-        if (counts[suit] >= 4) {
-            flushSuit = suit;
-        }
-    }
-    
-    return flushSuit ? new Flush(flushSuit, counts[flushSuit]) : null;
-}
-
-class Flush {
-    constructor(suit, num) {
-        this.suit = suit;
-        this.num = num;
-    }
-    
-    getScore() {
-        return this.num;
-    }
-    
-    getName() {
-        let score = " for " + this.num;
-        switch (this.suit) {
-            case "campfire" : return "Bonfire" + score;
-            case "tent" : return "Group site" + score;
-            case "sleepingbag" : return "Slumber party" + score;
-            case "mug" : return "Coffee shop" + score;
-        }
-    }
-}
-
-class Nobs {
-    constructor(suit) {
-        this.suit = suit;
-    }
-    
-    getScore() {
-        return 1;
-    }
-    
-    getName() {
-        let score = " for 1";
-        switch (this.suit) {
-            case "mug" : return "Joe" + score;
-            case "campfire" : return "James" + score;
-            default : return "Matching Jack (" + this.suit + ")" + score;
-        }
-    }
-}
-
-function findThings(values) {
-    values = fixValues(values);
-    values.sort((a,b) => a - b);
-    let tuples = findTuples(values);
-    let runsAndFifteens = findRunsAndFifteens(values);
-
-    let things = [];
-    
-    // First look for a thing that contains two tuples.
-    // e.g. 4 4 5 6 6 is a single thing containing both the
-    // pair of fours and the pair of sixes.
-    if (tuples.length === 2) {
-        let components = findThingComponents(tuples, runsAndFifteens);
-        if (components.included.length > 0) {
-            things.push(new Thing(tuples, components.included));
-            runsAndFifteens = components.excluded;
-        }
-    }
-    
-    
-    // Now look at each tuple individually.
-    for (let tuple of tuples) {
-        let components = findThingComponents([tuple], runsAndFifteens);
-        // Add it if it's a thing OR if the tuple isn't already part of
-        // a thing. This is how we count pairs that aren't part of tuples.
-        if (components.included.length > 0 || !tuple.thing) {
-            things.push(new Thing([tuple], components.included));
-        }
-        runsAndFifteens = components.excluded;
-    }
-
-    // If there are any runs or fifteens left over, put each one in 
-    // its own thing with no tuples.
-    for (let runOrFifteen of runsAndFifteens) {
-        things.push(new Thing([], [runOrFifteen]));
-    }
-    
-    return things;
-}
-    
-function getTotal(things) {
-    let total = 0;
-    for (let thing of things) {
-        total += thing.getScore();
-    }
-    return total;
-}    
-    
-function getScoreOutput(scoringGroups) {    
-    let output = "Total: " + getTotal(scoringGroups);
-    output += "<ul>";
-    for (let group of scoringGroups) {
-        output += "<li>" + group.getName() + "</lu>";
-    }
-    output += "</ul>";
-    return output;
-}
-
-function fixValues(nums) {
-  let fixed = [];
-  for (let num of nums) {
-    switch(num) {
-        case "J" : fixed.push(11); break;
-        case "Q" : fixed.push(12); break;
-        case "K" : fixed.push(13); break;
-        default : fixed.push(parseInt(num));
-    }
-  }
-  return fixed;
-}
-
 function findTuples(values) {
+    let unique = new Set();
+    values.forEach(value => unique.add(value));
+    
     let tuples = [];
-    let currentValue = -1;
-    let count = 0;
-    for (let value of values) {
-        if (value === currentValue) {
-            count++;
-        } else {
-            if (count > 1) {
-                tuples.push(new Tuple(currentValue, count));
-            }
-            currentValue = value;
-            count = 1;
+    for (let u of unique) {
+        let matches = values.filter(a => a === u);
+        if (matches.length > 1) {
+            tuples.push(new Tuple(u, matches.length));
         }
     }
-    if (count > 1) {
-        tuples.push(new Tuple(currentValue, count));
-    }
-    
     return tuples;
 }
 
@@ -293,7 +318,7 @@ function findFifteens(values) {
     let fifteens = [];
     let combos = findCombinationsTotaling(values.slice(), 15);
     for (let combo of combos) {
-        fifteens.push({"values" : combo, "type" : "fifteen-"});
+        fifteens.push(new ScoringGroup(combo, false));
     }
     return fifteens;
 }
@@ -329,12 +354,36 @@ function findRun(values) {
         } else if (value === run[run.length-1]) {
             // continue on...
         } else if (run.length >= 3) {
-            return {"values" : run, "type" : "run of "};
+            return new ScoringGroup(run, true);
         } else {
             run = [value];
         }
     }
-    return run.length >= 3 ? {"values" : run, "type" : "run of "} : null;
+    return run.length >= 3 ? new ScoringGroup(run, true) : null;
+}
+
+function findTupledGroups(tuples, groups) {
+    let tupledGroups = [];
+    for (let tuple of tuples) {
+        for (let group of groups) {
+            tupleCount = group.getTupleCount(tuple);
+            if (tupleCount > 1) {
+                tupledGroups.push(new TupledGroup(tuple, group));
+            }
+        }
+    }
+    return tupledGroups;
+}
+
+function findThings(tuples, tupledGroups) {
+    let things = [];
+    for (let tuple of tuples) {
+        let groups = tupledGroups.filter(tg => tg.tuple.value === tuple.value);
+        if (groups.length > 1) {
+            things.push(new Thing(tuple, groups));
+        }
+    }
+    return things;
 }
 
 function choose(n, k) {
@@ -342,262 +391,445 @@ function choose(n, k) {
     return (n * choose(n - 1, k - 1)) / k;
 }
 
-function findThingComponents(tuples, runsAndFifteens) {
-    let components = {"included" : [], "excluded" : []};
-    for (let runAndFifteen of runsAndFifteens) {
-        if (isInThing(tuples, runAndFifteen.values)) {
-            components.included.push(runAndFifteen);
-        } else {
-            components.excluded.push(runAndFifteen);
-        }
-    }
-    return components;
-}
-
-function isInThing(tuples, values) {
-    for (let tuple of tuples) {
-        var fromTuple = values.filter(a => a === tuple.value);
-        var tupleMultiplier = choose(tuple.count, fromTuple.length);
-        if (tupleMultiplier <= 1) {
-            return false;
-        }
-    }
-    return true;
-}
-
-class Tuple {
-    constructor(value, count) {
-        this.value = value;
-        this.count = count;
-    }
-}
-
-class Thing {
-    constructor(tuples, runsAndFifteens) {
-        this.tuples = tuples;
-        this.runsAndFifteens = runsAndFifteens;
-        for (let tuple of tuples) {
-            if (!tuple.thing) {
-                tuple.thing = this;
-            }
+function findFlush(suits) {
+    for (let suit of suits) {
+        let numInSuit = suits.filter(s => s === suit).length;
+        if (numInSuit >= 4) {
+            return new Flush(suit, numInSuit);
         }
     }
     
+    return null;
+}
+
+function findNobs(hand) {
+    let handCopy = hand.slice();
+    let turnSuit = handCopy.pop().suit;
+    let nobsTiles = handCopy.filter(tile => tile.suit === turnSuit && tile.value === 11);
+    return nobsTiles.length === 1 ? new Nobs(turnSuit) : null;
+}
+
+/* ********** Scoring Objects ********** */
+
+class Displayable {
     getName() {
-        this.tuples.sort((a,b) => b.count - a.count);
-        this.runsAndFifteens.sort((a,b) => b.values.length - a.values.length);
-        
-        let name = "";
-        let msAndNsName = this.getMsAndNsName();
-        if (msAndNsName) {
-            name = msAndNsName;
-        } else if (this.runsAndFifteens.length === 0) {
-            name = this.getPairName();
-        } else if (this.runsAndFifteens.length === 1) {
-            name = this.getTupleName();
-        } else {
-            name = this.getThingName();
-        }
-
-        if (this.tuples.length === 1 && this.tuples[0].thing != this) {
-            name += " minus the pair";
-        }
-        
-        name += " for " + this.getScore();
-        return name;
+        return "";
     }
     
-    getPairName() {
-        let numTiles = this.tuples[0].count;
-        switch (numTiles) {
-            case 2 : return "pair";
-            case 3 : return "pair royal";
-            case 4 : return "double pair royal";
-        }
-    }
-    
-    getTupleName() {
-        let name = "";
-        for (let tuple of this.tuples) {
-            let n = this.getTupleMultiplier(tuple);
-            switch (n) {
-                case 2 : name += "double "; break;
-                case 3 : name += "triple "; break;
-                case 4 : name += "quadruple "; break;
-                case 6 : name += "sextuple "; break;
-             }
-        }
-        
-        let runOrFifteen = this.runsAndFifteens[0];
-        name += runOrFifteen.type + runOrFifteen.values.length;
-        return name;
-    }
-    
-    getThingName() {
-        let output = "(";
-        for (let i = 0; i < this.runsAndFifteens.length; i++) {
-            let runOrFifteen = this.runsAndFifteens[i];
-            if (i > 0) output += ",";
-            output += runOrFifteen.values.length;
-        }
-        output += ") ";
-        if (this.tuples.length > 1) {
-            output += "(";
-        }
-        for (let i = 0; i < this.tuples.length; i++) {
-            let tuple = this.tuples[i];
-            if (i > 0) output += ",";
-            output += tuple.count;
-        }
-        if (this.tuples.length > 1) {
-            output += ")";
-        }
-        output += "-thing";
-        
-        return output;       
+    getFormula() {
+        return "";
     }
     
     getScore() {
-        let score1 = 0;
-        let score2 = 0;
-        for (let runOrFifteen of this.runsAndFifteens) {
-            score1 += runOrFifteen.values.length;
-        }
-        
-        for (let tuple of this.tuples) {
-            if (score1 > 0) {
-                score1 *= this.getTupleMultiplier(tuple);
-            }
-            
-            if (tuple.thing === this) {
-                score2 += 2 * choose(tuple.count, 2);
-            }
-        }
-        return score1 + score2;
+        return 0;
+    }
+}
+
+class Scorable extends Displayable {
+    constructor() {
+        super();
+        this.consumed = false;
     }
     
-    getTupleMultiplier(tuple) {
-        let tupled = this.runsAndFifteens[0].values.filter(value => value === tuple.value);
-        return choose(tuple.count, tupled.length);
+    getFormula() {
+        let formula = "(";
+        let inside = this.getInsideParens();
+        for (let i = 0; i < inside.length; i++) {
+            formula += inside[i];
+            if (i < inside.length-1) formula += " + "
+        }
+        formula += ")";
+        
+        this.getOutsideParens().forEach(outside => formula += " * " + outside);
+        return formula;
     }
     
-    getMsAndNsName() {
-        let numTiles = 0;
-        if (this.runsAndFifteens.length > 1) {
-            return false;
+    getInsideParens() {
+        return [];
+    }
+    
+    getOutsideParens() {
+        return [];
+    }
+    
+    getMultiplier() {
+        let multiplier = 1;
+        this.getOutsideParens().forEach(m => multiplier *= m);
+        return multiplier;
+    }
+    
+    getScore() {
+        return 0;
+    }
+}
+
+// A tuple is a repeated tile value within a hand
+class Tuple extends Scorable {
+    constructor(value, count) {
+        super();
+        this.value = value;
+        this.count = count;
+    }
+    
+    getName() {
+        let name = "";
+        switch (this.count) {
+            case 2 : name = "Pair of "; break;
+            case 3 : name = "Pair Royal of "; break;
+            case 4 : name = "Double Pair Royal of "; break;
         }
-        
-        let allValues = new Set();
+        return name + this.value + "s";
+    }
+    
+    getInsideParens() {
+        return [this.count-1];
+    }
+    
+    getOutsideParens() {
+        return [this.count];
+    }
+    
+    getScore() {
+        // (count choose 2) * 2 = count * (count-1)
+        return this.count * (this.count-1);
+    }
+}
+
+// A scoring group is just a run or a fifteen
+class ScoringGroup extends Scorable {
+    constructor(values, isRun) {
+        super();
+        this.values = values;
+        this.isRun = isRun;
+    }
+    
+    getName() {
+        let name = this.isRun ? "Run of " : "Fifteen-";
+        name += this.values.length;
+        return name;
+    }
+
+    getTotalTupleCount(tuples) {
+        let total = 1;
+        for (let tuple of tuples) {
+            total *= this.getTupleCount(tuple);
+        }
+        return total;
+    }
+
+    getTupleCount(tuple) {
+        let numUsed = this.values.filter(value => value === tuple.value).length
+        return numUsed > 0 ? choose(tuple.count, numUsed) : 1;
+    }
+    
+    getInsideParens() {
+        return [this.values.length];
+    }
+    
+    getOutsideParens() {
+        return [];
+    }
+    
+    getScore() {
+        // Atomic!
+        return this.values.length;
+    }
+}
+
+// A tupled group is a scoring group that is counted
+// multiple times because of a tuple.
+class TupledGroup extends Scorable {
+    constructor(tuple, scoringGroup) {
+        super();
+        this.tuple = tuple;
+        this.scoringGroup = scoringGroup;
+        tuple.consumed = true;
+        scoringGroup.consumed = true;
+    }
+    
+    getName() {
+        return this.getTupleName() + this.scoringGroup.getName();
+    }
+    
+    getTupleName() {
+        return getTupleName(this.getTupleCount());
+    }
+    
+    getInsideParens() {
+        return [this.scoringGroup.values.length, this.tuple.count-1];
+    }
+    
+    getOutsideParens() {
+        return [this.tuple.count];
+    }
+    
+    getTupleCount() {
+        return this.scoringGroup.getTupleCount(this.tuple);
+    }
+    
+    getScore() {
+        // 1,2,2,3 should be 3*2 + 2
+        // 1,2,2,2,3 should be 3*3 + 6
+        // 4,4,4,4,7 should be 3*6 + 12
+        return this.scoringGroup.getScore() * this.getTupleCount() + this.tuple.getScore();
+    }
+}
+
+function getTupleName(count) {
+    switch(count) {
+        case 2 : return "Double ";
+        case 3 : return "Triple ";
+        case 4 : return "Quadruple ";
+        case 6 : return "Sextuple ";
+    }    
+}
+
+class CompoundTupledGroup extends Scorable {
+    constructor(tupledGroups) {
+        super();
+        tupledGroups.forEach(group => group.consumed = true);
+        this.scoringGroup = tupledGroups[0].scoringGroup;
+        this.tuples = tupledGroups.map(group => group.tuple);
+    }
+    
+    getName() {
+        let name = "";
         for (let tuple of this.tuples) {
-            allValues.add(tuple.value);
-            numTiles += tuple.count;
+            name += getTupleName(tuple.count);
         }
-        if (this.runsAndFifteens.length === 1) {
-            let runOrFifteen = this.runsAndFifteens[0];
-            if (runOrFifteen.values.length > 2) {
-                return false;
-            }
-            this.runsAndFifteens[0].values.forEach(item => allValues.add(item));
-            numTiles += 2 - this.tuples.length;
+        // Slight hack here but not too bad.
+        name += this.scoringGroup.getName();
+        return name;
+    }
+    
+    getFormula() {
+        let part1 = '';
+        let part2 = ''
+        for (let tuple of this.tuples) {
+            part1 += tuple.count + ' * ';
+            part2 += ' + ' + tuple.getScore();
         }
-        if (allValues.size <= 2) {                        
-            switch (allValues.values().next().value) {
-                case 6 :
-                case 9 : return "" + numTiles + " nines and sixes";
-                case 7 :
-                case 8 : return "" + numTiles + " eights and sevens";
-            }
+        return part1 + this.scoringGroup.getScore() + part2;
+    }
+    
+    getScore() {
+        let multiplier = 1;
+        this.tuples.forEach(tuple => multiplier *= tuple.count);
+        let score = multiplier * this.scoringGroup.getScore();
+        for (let tuple of this.tuples) {
+            score += tuple.getScore();
         }
-        return null;
+        return score;
+    }
+    
+}
+
+// A thing happens when there are multiple tupled groups
+// for the same tuple.
+class Thing extends Scorable {
+    constructor(tuple, tupledGroups) {
+        super();
+        this.tuple = tuple;
+        this.tupledGroups = tupledGroups;
+        this.groups = tupledGroups.map(tupledGroup => tupledGroup.scoringGroup);
+        this.groups.sort((a,b) => b.values.length - a.values.length);
+        tupledGroups.forEach(tg => tg.consumed = true);
+    }
+    
+    getName() {
+        let name = "(";
+        for (let i = 0; i < this.groups.length; i++) {
+            if (i > 0) name += ",";
+            name += this.groups[i].values.length;
+        }
+        name += ") ";
+        switch (this.tuple.count) {
+            case 3 : name += "Royal "; break;
+            case 4 : name += "Four-"; break;
+        }
+        name += "Thing";
+        return name;
+    }
+    
+    getInsideParens() {
+        let inside = [];
+        this.groups.forEach(group => inside = inside.concat(group.getInsideParens()));
+        inside = inside.concat(this.tuple.getInsideParens());
+        return inside;
+    }
+    
+    getOutsideParens() {
+        return this.tuple.getOutsideParens();
+    }
+    
+    getScore() {
+        let score = 0;
+        // Need tupled groups for this!
+        this.tupledGroups.forEach(tg => score += (tg.getTupleCount() * tg.scoringGroup.getScore()));
+        score += this.tuple.getScore();
+        return score;
     }
 }
 
-function doClear() {
-    document.location.hash = "";
-    selectFromHash();
-}
-
-function clearSelections() {
-    let selectedNums = document.querySelectorAll("div.num.selected");
-    for (let selected of selectedNums) {
-        selected.classList.remove("selected");
+class CompoundThing extends Scorable {
+    constructor(components) {
+        super();
+        this.components = components;
+        this.components.sort((a,b) => a.tuple.count - b.tuple.count);
+        components.forEach(c => c.consumed = true);
     }
-    document.getElementById("tilerow").innerHTML = "";
-    document.getElementById("output").innerHTML = "";   
-}
-
-function countRandomHand() {
-    let hand = getRandomHand();
-    let hash = getHandShortHand(hand);
-    document.location.hash = hash;
-    selectFromHash();
-    let scoringGroups = scoreHand(hand);
-    return getTotal(scoringGroups);
-}
-
-function selectHand(hand) {
-    clearSelections();
-    for (let tile of hand) {
-        let id = getTileShortHand(tile);
-        doToggle(document.getElementById(id));
+    
+    getName() {
+        let name = "(";
+        for (let i = 0; i < this.components[0].groups.length; i++) {
+            if (i > 0) name += ",";
+            name += this.components[0].groups[i].values.length;
+        }
+        name += ") Double Thing";
+        return name;
+    }
+    
+    getInsideParens() {
+        // Ugly...
+        return this.components[0].getInsideParens();
+    }
+    
+    getOutsideParens() {
+        let outside = [];
+        this.components.forEach(comp => outside = outside.concat(comp.getOutsideParens()));
+        return outside;
+    }
+    
+    getScore() {
+        let score = 0;
+        this.components.forEach(comp => score += comp.getScore());
+        return score;
     }
 }
 
-function getHandShortHand(hand) {
-    let output = "";
-    for (let tile of hand) {
-        output += getTileShortHand(tile);
+class PartialCompoundThing extends Scorable {
+    constructor(thing, tupledGroup) {
+        super();
+        this.thing = thing;
+        this.tupledGroup = tupledGroup;
+        thing.consumed = true;
+        tupledGroup.consumed = true;
     }
-    return output;
-}
-
-function getTileShortHand(tile) {
-    return tile.suit.charAt(0) + tile.value;
-}
-
-function getHandFromShortHand(shortHand) {
-    let tiles = [];
-    let tileIds = splitHash(shortHand);
-    for (let tileId of tileIds) {
-        tiles.push(fromShortHand(tileId));
+    
+    getName() {
+        // This needs a ton of work.
+        let name = "(Double " + this.tupledGroup.scoringGroup.values.length + ",";
+        name += this.thing.getName().substring(1);
+        return name;
     }
-    return tiles;
+    
+    getInsideParens() {
+        let inside = this.tupledGroup.getInsideParens().slice();
+        inside = inside.concat(this.thing.getInsideParens());
+        return inside;
+    }
+    
+    getOutsideParens() {
+        // The pair from the tupled group is accounted for inside
+        // the parentheses. Need a better explanation for why this works!
+        return this.thing.getOutsideParens();
+    }
+    
+    getScore() {
+        return this.thing.getScore() + this.tupledGroup.getScore();
+    }
 }
 
-function fromShortHand(shortHand) {
-    let suits = ["campfire","mug","sleepingbag","tent"];
-    let suitStr = shortHand.charAt(0);
-    for (let suit of suits) {
-        if (suit.charAt(0) === suitStr) {
-            suitStr = suit;
-            break;
+class Flush extends Scorable {
+    constructor(suit, num) {
+        super();
+        this.suit = suit;
+        this.num = num;
+    }
+    
+    getScore() {
+        return this.num;
+    }
+    
+    getName() {
+        switch (this.suit) {
+            case "campfire" : return "Bonfire";
+            case "tent" : return "Group site";
+            case "sleepingbag" : return "Slumber party";
+            case "mug" : return "Coffee shop";
         }
     }
-    let value = shortHand.substring(1);
-    return {"suit" : suitStr, "value" : value};
+    
+    getInsideParens() {
+        return [this.num];
+    }
+    
+    getOutsideParens() {
+        return [];
+    }
 }
 
-function getRandomHand() {
-    let suits = ["campfire","mug","sleepingbag","tent"];
-    let hand = [];
+class Nobs extends Scorable {
+    constructor(suit) {
+        super();
+        this.suit = suit;
+    }
+    
+    getScore() {
+        return 1;
+    }
+    
+    getName() {
+        switch (this.suit) {
+            case "mug" : return "Joe";
+            case "campfire" : return "James";
+            default : return "Matching Jack (" + this.suit + ")";
+        }
+    }
+    
+    getInsideParens() {
+        return [1];
+    }
+    
+    getOutsideParens() {
+        return [];
+    }    
+}
+
+class TotalScore extends Displayable {
+    constructor(scoreParts) {
+        super();
+        this.scoreParts = scoreParts;
+    }
+    
+    getName() {
+        return "Total";
+    }
+    
+    getScore() {
+        let score = 0;
+        this.scoreParts.forEach(part => score += part.getScore());
+        return score;
+    }
+}
+
+/* ********** Random ********** */
+function showRandomHand() {
+    document.location.hash = getRandomShortHand();
+    return selectFromHash();
+}
+
+function getRandomShortHand() {
+    let suits = ['c','m','s','t'];
+    let shortHand = [];
     let handIndexes = getRandomIndexes();
     for (let idx of handIndexes) {
         let suitIdx = Math.floor(idx/13);
         let suit = suits[suitIdx];
-        let value = getTileValue(idx);
-        hand.push({"suit" : suit, "value" : value});
+        let value = Tile.toStringValue(idx % 13 + 1);
+        shortHand += suit + value;
     }
-    return hand;
-}
-
-function getTileValue(idx) {
-    let value = idx % 13 + 1;
-    switch (value) {
-        case 11 : return "J";
-        case 12 : return "Q";
-        case 13 : return "K";
-        default : return value.toString();
-    }
+    return shortHand;
 }
 
 function getRandomIndexes() {
@@ -613,7 +845,7 @@ function getRandomIndexes() {
 }
 
 function findMonster() {
-    let total = countRandomHand();
+    let total = showRandomHand();
     if (total < 15) {
         setTimeout(findMonster, 180);
     }
