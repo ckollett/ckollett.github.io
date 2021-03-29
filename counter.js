@@ -108,7 +108,7 @@ function getOutputAsTable(scoreParts) {
     for (let part of scoreParts) {
         table += createTableRow(part);
     }
-    table += createTableRow(new TotalScore(scoreParts), "total");
+    table += createTableRow(new TotalScore(scoreParts), "pasttotal");
     
     return table + "</table>";
 }
