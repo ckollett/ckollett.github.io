@@ -210,6 +210,7 @@ function scoreValues(values) {
     
     let allComponents = [];
     let tuples = findTuples(values);
+    tuples.sort((a,b) => b.count - a.count);
     allComponents = allComponents.concat(tuples);
     
     let scoringGroups = findRunsAndFifteens(values);
