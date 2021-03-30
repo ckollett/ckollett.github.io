@@ -135,7 +135,8 @@ function splitShortHand(shortHand) {
 
 class CounterTile {
     constructor(value, suit) {
-        this.value = CounterTile.toNumberValue(value);
+        this.value = CounterTile.toStringValue(value);
+        this.number = CounterTile.toNumberValue(value);
         this.suit = CounterTile.resolveSuit(suit);
     }
     
@@ -193,7 +194,7 @@ function getTotal(scoreParts) {
 function scoreHand(tiles) {
     if (typeof(tiles) === 'string') tiles = getHandFromShortHand(tiles);
     
-    let scores = scoreValues(tiles.map(tile => tile.value));
+    let scores = scoreValues(tiles.map(tile => tile.number));
     let flush = findFlush(tiles.map(tile => tile.suit));
     if (flush) {
         scores.push(flush);
@@ -407,12 +408,11 @@ function findFlush(suits) {
 function findNobs(hand) {
     let handCopy = hand.slice();
     let turnSuit = handCopy.pop().suit;
-    let nobsTiles = handCopy.filter(tile => tile.suit === turnSuit && tile.value === 11);
+    let nobsTiles = handCopy.filter(tile => tile.suit === turnSuit && tile.number === 11);
     return nobsTiles.length === 1 ? new Nobs(turnSuit) : null;
 }
 
 /* ********** Scoring Objects ********** */
-
 class Displayable {
     constructor() {
         this.priority = 0;
@@ -485,7 +485,7 @@ class Tuple extends Scorable {
             case 3 : name = "Pair Royal of "; break;
             case 4 : name = "Double Pair Royal of "; break;
         }
-        return name + this.value + "s";
+        return name + CounterTile.toStringValue(this.value) + '<span style="font-size:smaller;">s</span>';
     }
     
     getInsideParens() {
