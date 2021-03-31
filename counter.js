@@ -564,12 +564,11 @@ class TupledGroup extends Scorable {
         return getTupleName(this.getTupleCount());
     }
     
-    getInsideParens() {
-        return [this.scoringGroup.values.length, this.tuple.count-1];
-    }
-    
-    getOutsideParens() {
-        return [this.tuple.count];
+    getFormula() {
+        let numTupleInGroup = this.scoringGroup.values.filter(v => v === this.tuple.value).length;
+        let score1 = '' + choose(this.tuple.count,numTupleInGroup) + ' * ' + this.scoringGroup.values.length;
+        let score2 = '' + choose(this.tuple.count,2) + ' * 2';
+        return score1 + ' + ' + score2;
     }
     
     getTupleCount() {
@@ -607,7 +606,6 @@ class CompoundTupledGroup extends Scorable {
         for (let tuple of this.tuples) {
             name += getTupleName(tuple.count);
         }
-        // Slight hack here but not too bad.
         name += this.scoringGroup.getName();
         return name;
     }
