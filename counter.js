@@ -9,7 +9,6 @@ function displayAndScore(tiles) {
     displayTiles(tiles);
     if (tiles.length === 5) {
         let scoreParts = scoreHand(tiles);
-        scoreParts.sort((a,b) => b.priority - a.priority);
         let table = getOutputAsTable(scoreParts);
         document.getElementById('output').innerHTML = table;
         
@@ -203,6 +202,7 @@ function scoreHand(tiles) {
     if (nobs) {
         scores.push(nobs);
     }
+    scores.sort((a,b) => b.priority - a.priority);
     return scores;
 }
 
