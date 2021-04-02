@@ -207,7 +207,7 @@ function scoreHand(tiles) {
 }
 
 function scoreValues(values) {
-    values.sort();
+    values.sort((a,b) => a-b);
     
     let allComponents = [];
     let tuples = findTuples(values);
