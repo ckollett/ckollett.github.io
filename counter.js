@@ -872,7 +872,7 @@ function scorePeggingValues(values) {
     for (let i = 0; i < values.length-2; i++) {
         let possibleRun = values.slice(i);
         if (isPeggingRun(possibleRun)) {
-            scoreParts.push(new ScoringGroup(values, true));
+            scoreParts.push(new ScoringGroup(possibleRun, true));
             break;
         }
     }
