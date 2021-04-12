@@ -861,6 +861,34 @@ function findMonster() {
 }
 
 /* ************ Pegging **************** */
+class ThirtyOne extends Displayable {
+    getName() {
+        return "31";
+    }
+    
+    getFormula() {
+        return "2";
+    }
+    
+    getScore() {
+        return 2;
+    }    
+}
+
+class Go extends Displayable {
+    getName() {
+        return "Go";
+    }
+    
+    getFormula() {
+        return "1";
+    }
+    
+    getScore() {
+        return 1;
+    }    
+}
+
 function scorePeggingTiles(tiles) {
     return scorePeggingValues(tiles.map(tile => tile.number));
 }
