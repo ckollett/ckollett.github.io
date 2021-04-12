@@ -818,9 +818,7 @@ class TotalScore extends Displayable {
     }
     
     getScore() {
-        let score = 0;
-        this.scoreParts.forEach(part => score += part.getScore());
-        return score;
+        return this.scoreParts.reduce((accum, current) => accum + current.getScore(), 0);
     }
 }
 
@@ -860,4 +858,63 @@ function findMonster() {
     if (total < 15) {
         setTimeout(findMonster, 180);
     }
+}
+
+/* ************ Pegging **************** */
+function scorePeggingTiles(tiles) {
+    return scorePeggingValues(tiles.map(tile => tile.number));
+}
+
+function scorePeggingValues(values) {
+    let scoreParts = [];
+
+    // For runs, go forward to find the biggest possible run...
+    for (let i = 0; i < values.length-2; i++) {
+        let possibleRun = values.slice(i);
+        if (isPeggingRun(possibleRun)) {
+            scoreParts.push(new ScoringGroup(values, true));
+            break;
+        }
+    }
+
+    // Only check for tuples if it's not a run.
+    if (scoreParts.length === 0) {
+        let tupleSize = 1;
+        let lastValue = values[values.length-1];
+        for (let i = values.length-2; i >= 0; i--) {
+            if (values[i] === lastValue) {
+                tupleSize++;
+            } else {
+                break;
+            }
+        }
+        if (tupleSize > 1) {
+            scoreParts.push(new Tuple(lastValue, tupleSize));
+        }
+    }
+    
+    // Now check for  fifteens.
+    let sum = 0;
+    for (let i = 1; i <= values.length; i++) {
+        sum += values[values.length-i];
+        if (sum === 15) {
+            scoreParts.push(new ScoringGroup(values.slice(values.length-i, values.length), false));
+        } else if (sum > 15) {
+            break;
+        }
+    }
+    
+    return scoreParts;    
+}
+
+function isPeggingRun(values) {
+    let max = 0;
+    let min = 14;
+    let valueSet = new Set();
+    for (let value of values) {
+        valueSet.add(value);
+        min = Math.min(min, value);
+        max = Math.max(max, value);
+    }
+    return valueSet.size === values.length && max-min === values.length-1;
 }
