@@ -932,14 +932,12 @@ function scorePeggingValues(values) {
     }
     
     // Now check for  fifteens.
-    let sum = 0;
-    for (let i = 1; i <= values.length; i++) {
-        sum += Math.min(values[values.length-i],10);
-        if (sum === 15) {
-            scoreParts.push(new ScoringGroup(values.slice(values.length-i, values.length), false));
-        } else if (sum > 15) {
-            break;
-        }
+    let sumReducer = function(total, value) {
+        return total + Math.min(value, 10);
+    }
+    let total = values.reduce(sumReducer, 0);
+    if (total === 15) {
+        scoreParts.push(new ScoringGroup(values, false));
     }
     
     return scoreParts;    
