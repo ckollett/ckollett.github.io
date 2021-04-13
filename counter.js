@@ -9,7 +9,7 @@ function displayAndScore(tiles) {
     displayTiles(tiles);
     if (tiles.length === 5) {
         let scoreParts = scoreHand(tiles);
-        let table = getOutputAsTable(scoreParts);
+        let table = getOutputAsTable(scoreParts, true);
         document.getElementById('output').innerHTML = table;
         
         let total = new TotalScore(scoreParts);
@@ -100,23 +100,33 @@ function createHash() {
 }
 
 /* ********** Output ********** */
-function getOutputAsTable(scoreParts) {
+function getOutputAsTable(scoreParts, showFormula) {
     let table = '<table id="pasttable">';
     
-    table += '<tr class="pastheader"><td class="pastname">Name</td><td class="pastscore">Score</td><td class="pastformula">Formula</td></tr>';
-    for (let part of scoreParts) {
-        table += createTableRow(part);
+    table += '<tr class="pastheader"><td class="pastname">Name</td><td class="pastscore">Score</td>';
+    if (showFormula) {
+        table += '<td class="pastformula">Formula</td>';
     }
-    table += createTableRow(new TotalScore(scoreParts), "pasttotal");
+    table += '</tr>';
+    
+    for (let part of scoreParts) {
+        table += createTableRow(part, '', showFormula);
+    }
+    
+    if (scoreParts.length > 1) {
+        table += createTableRow(new TotalScore(scoreParts), "pasttotal", showFormula);
+    }
     
     return table + "</table>";
 }
 
-function createTableRow(scorePart, rowClass) {
+function createTableRow(scorePart, rowClass, showFormula) {
     let row = '<tr class="' + (rowClass || "part") + '">';
     row += '<td class="pastname">' + scorePart.getName() + '</td>';
     row += '<td class="pastscore">' + scorePart.getScore() + '</td>';
-    row += '<td class="pastformula">' + scorePart.getFormula().replaceAll('*','&times') + '</td>';
+    if (showFormula) {
+        row += '<td class="pastformula">' + scorePart.getFormula().replaceAll('*','&times') + '</td>';
+    }
     return row + '</tr>';
 }
 
