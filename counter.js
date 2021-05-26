@@ -804,6 +804,7 @@ class Nobs extends Scorable {
         switch (this.suit) {
             case "mug" : return "Joe";
             case "campfire" : return "James";
+            case "sleepingbag" : return "Slumberjack";
             default : return "Matching Jack (" + this.suit + ")";
         }
     }
