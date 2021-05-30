@@ -419,7 +419,7 @@ function findNobs(hand) {
     let handCopy = hand.slice();
     let turnSuit = handCopy.pop().suit;
     let nobsTiles = handCopy.filter(tile => tile.suit === turnSuit && tile.number === 11);
-    return nobsTiles.length === 1 ? new Nobs(turnSuit) : null;
+    return nobsTiles.length === 1 ? new ScoringJack(turnSuit, 1) : null;
 }
 
 /* ********** Scoring Objects ********** */
@@ -790,14 +790,15 @@ class Flush extends Scorable {
     }
 }
 
-class Nobs extends Scorable {
-    constructor(suit) {
+class ScoringJack extends Scorable {
+    constructor(suit, points) {
         super();
         this.suit = suit;
+        this.points = points;
     }
     
     getScore() {
-        return 1;
+        return this.points;
     }
     
     getName() {
@@ -805,12 +806,12 @@ class Nobs extends Scorable {
             case "mug" : return "Joe";
             case "campfire" : return "James";
             case "sleepingbag" : return "Slumberjack";
-            default : return "Matching Jack (" + this.suit + ")";
+            case "tent" : return "Jack of Tents";
         }
     }
     
     getInsideParens() {
-        return [1];
+        return [this.points];
     }
     
     getOutsideParens() {
