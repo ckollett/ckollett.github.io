@@ -295,6 +295,8 @@ function attemptMerge(things, unusedTupleGroups) {
     // For compound thing, check that the scoring groups actually match.
     // For partial, check that the unused tuple is actually in the thing correctly.
     if (things.length > 1) {
+        // This is something like 4,4,5,6,6 - the same run/15 is a thing 
+        // using both the 4 and the 6.
         return new CompoundThing(things);
     } else if (things.length === 1 && unusedTupleGroups.length === 1) {
         return new PartialCompoundThing(things[0], unusedTupleGroups[0]);
@@ -302,6 +304,8 @@ function attemptMerge(things, unusedTupleGroups) {
         let unique = new Set();
         unusedTupleGroups.forEach(group => unique.add(group.scoringGroup));
         if (unique.size === 1) {
+            // This is a double-double or triple-double-double
+            // For example 7,7,8,8,2 or 7,7,7,8,8
             return new CompoundTupledGroup(unusedTupleGroups);
         }
     } else {
@@ -751,10 +755,20 @@ class PartialCompoundThing extends Scorable {
     }
     
     getName() {
-        // This needs a ton of work.
-        let name = "(Double " + this.tupledGroup.scoringGroup.values.length + ",";
-        name += this.thing.getName().substring(1);
-        return name;
+        // The real way to do this is to look into the thing and figure out which
+        // of the tupledGroups in the Thing matches the other tupledGroup. This
+        // is the doubled group, the other one goes in the other spot in the 
+        // parentheses. The following is "good enough" but could definitely be improved.
+        let afterComma = "";
+        let beforeComma = "";
+        for (let thingGroup of this.thing.tupledGroups) {
+            if (beforeComma.length == 0 && thingGroup.scoringGroup.values.length == this.tupledGroup.scoringGroup.values.length) {
+                beforeComma = "Double " + thingGroup.scoringGroup.values.length;
+            } else {
+                afterComma += "," + thingGroup.scoringGroup.values.length;
+            }
+        }
+        return "(" + beforeComma + afterComma + ") Thing";
     }
     
     getInsideParens() {
@@ -832,23 +846,10 @@ class ScoringJack extends Scorable {
     }    
 }
 
-class SuitDiversity extends Scorable {
-    getScore() {
-        return 0;
-    }
-    
+class SuitDiversity extends Displayable {
     getName() {
         return "Suit Diversity";
     }
-    
-    
-    getInsideParens() {
-        return [0];
-    }
-    
-    getOutsideParens() {
-        return [];
-    }        
 }
 
 class TotalScore extends Displayable {
