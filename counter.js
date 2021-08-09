@@ -212,6 +212,11 @@ function scoreHand(tiles) {
     if (nobs) {
         scores.push(nobs);
     }
+    let sd = findSuitDiversity(tiles);
+    if (sd) {
+        scores.push(sd);
+    }
+    
     scores.sort((a,b) => b.priority - a.priority);
     return scores;
 }
@@ -420,6 +425,14 @@ function findNobs(hand) {
     let turnSuit = handCopy.pop().suit;
     let nobsTiles = handCopy.filter(tile => tile.suit === turnSuit && tile.number === 11);
     return nobsTiles.length === 1 ? new ScoringJack(turnSuit, 1) : null;
+}
+
+function findSuitDiversity(hand) {
+    let suits = new Set();
+    for (let i = 0; i < 4; i++) {
+        suits.add(hand[i].suit);
+    }
+    return suits.size === 4 ? new SuitDiversity() : null;
 }
 
 /* ********** Scoring Objects ********** */
@@ -817,6 +830,25 @@ class ScoringJack extends Scorable {
     getOutsideParens() {
         return [];
     }    
+}
+
+class SuitDiversity extends Scorable {
+    getScore() {
+        return 0;
+    }
+    
+    getName() {
+        return "Suit Diversity";
+    }
+    
+    
+    getInsideParens() {
+        return [0];
+    }
+    
+    getOutsideParens() {
+        return [];
+    }        
 }
 
 class TotalScore extends Displayable {
