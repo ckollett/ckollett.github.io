@@ -254,13 +254,6 @@ function scoreValues(values) {
     
     allComponents = allComponents.filter(item => !item.consumed);
     
-    for (let s of allComponents) {
-        console.log(s.getName());
-        console.log("    " + s.getFormula());
-    }
-    
-    console.log(scores);
-    
     return allComponents;
 }
 
@@ -569,6 +562,10 @@ class ScoringGroup extends Scorable {
         // Atomic!
         return this.values.length;
     }
+    
+    equals(otherGroup) {
+        return otherGroup.values === this.values && otherGroup.isRun === this.isRun;
+    }
 }
 
 // A tupled group is a scoring group that is counted
@@ -752,35 +749,27 @@ class PartialCompoundThing extends Scorable {
         thing.consumed = true;
         tupledGroup.consumed = true;
         this.priority = 6;
+        
+        // One of the scoring groups in the thing will be doubled, the other undoubled.
+        for (let thingGroup of thing.tupledGroups) {
+            if (thingGroup.scoringGroup.equals(tupledGroup.scoringGroup)) {
+                this.doubled = tupledGroup.scoringGroup.values.length;
+            } else {
+                this.undoubled = thingGroup.scoringGroup.values.length;
+            }
+        }
     }
     
     getName() {
-        // The real way to do this is to look into the thing and figure out which
-        // of the tupledGroups in the Thing matches the other tupledGroup. This
-        // is the doubled group, the other one goes in the other spot in the 
-        // parentheses. The following is "good enough" but could definitely be improved.
-        let afterComma = "";
-        let beforeComma = "";
-        for (let thingGroup of this.thing.tupledGroups) {
-            if (beforeComma.length == 0 && thingGroup.scoringGroup.values.length == this.tupledGroup.scoringGroup.values.length) {
-                beforeComma = "Double " + thingGroup.scoringGroup.values.length;
-            } else {
-                afterComma += "," + thingGroup.scoringGroup.values.length;
-            }
-        }
-        return "(" + beforeComma + afterComma + ") Thing";
+        return "(Double " + this.doubled + "," + this.undoubled + ") Thing";
     }
     
     getInsideParens() {
-        let inside = this.tupledGroup.getInsideParens().slice();
-        inside = inside.concat(this.thing.getInsideParens());
-        return inside;
+        return ["2 * " + this.doubled, this.undoubled, "2"];
     }
     
     getOutsideParens() {
-        // The pair from the tupled group is accounted for inside
-        // the parentheses. Need a better explanation for why this works!
-        return this.thing.getOutsideParens();
+        return ["2"];
     }
     
     getScore() {
