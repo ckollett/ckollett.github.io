@@ -764,6 +764,15 @@ class PartialCompoundThing extends Scorable {
         return "(Double " + this.doubled + "," + this.undoubled + ") Thing";
     }
     
+    /*********************************************************************
+     The formula here is a little crazy.
+     The doubled part will be 2 x 2 x <group size> (regular double double run, etc.)
+     The undoubled group will be 2 x <group size>
+     There are then two pairs to count.
+     So this could be something like:
+     (2x2x3) + (2x2) + (2+2) = 2 * (2x3 + 2 + 2)     
+     *********************************************************************/
+    
     getInsideParens() {
         return ["2 * " + this.doubled, this.undoubled, "2"];
     }
