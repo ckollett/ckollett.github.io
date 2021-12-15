@@ -211,6 +211,11 @@ function scoreHand(tiles) {
     let nobs = findNobs(tiles);
     if (nobs) {
         scores.push(nobs);
+    } else {
+        let numJacks = tiles.filter(a => a.value === 'J').length;
+        if (numJacks > 1) {
+            scores.push(new WrongJacks(numJacks));
+        }
     }
     let sd = findSuitDiversity(tiles);
     if (sd) {
@@ -842,6 +847,17 @@ class ScoringJack extends Scorable {
     getOutsideParens() {
         return [];
     }    
+}
+
+class WrongJacks extends Displayable {
+    constructor(numWrongJacks) {
+        super();
+        this.numWrongJacks = numWrongJacks;
+    }
+    
+    getName() {
+        return "" + this.numWrongJacks + " Wrong Jacks";
+    }
 }
 
 class SuitDiversity extends Displayable {
