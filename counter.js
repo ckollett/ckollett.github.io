@@ -856,7 +856,11 @@ class WrongJacks extends Displayable {
     }
     
     getName() {
-        return "" + this.numWrongJacks + " Wrong Jacks";
+        if (this.numWrongJacks === 3) {
+            return "All the Wrong Jacks";
+        } else {
+            return "" + this.numWrongJacks + " Wrong Jacks";
+        }
     }
 }
 
