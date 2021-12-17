@@ -212,9 +212,9 @@ function scoreHand(tiles) {
     if (nobs) {
         scores.push(nobs);
     } else {
-        let numJacks = tiles.filter(a => a.value === 'J').length;
-        if (numJacks > 1) {
-            scores.push(new WrongJacks(numJacks));
+        wrongJacks = findWrongJacks(tiles);
+        if (wrongJacks) {
+            scores.push(wrongJacks);
         }
     }
     let sd = findSuitDiversity(tiles);
@@ -427,6 +427,13 @@ function findNobs(hand) {
     let turnSuit = handCopy.pop().suit;
     let nobsTiles = handCopy.filter(tile => tile.suit === turnSuit && tile.number === 11);
     return nobsTiles.length === 1 ? new ScoringJack(turnSuit, 1) : null;
+}
+
+function findWrongJacks(hand) {
+    let handOnly = hand.slice();
+    handOnly.pop();
+    let numJacks = handOnly.filter(a => a.value === 'J').length;
+    return numJacks > 1 ? new WrongJacks(numJacks) : null;
 }
 
 function findSuitDiversity(hand) {

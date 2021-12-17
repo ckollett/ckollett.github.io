@@ -73,6 +73,19 @@ div#tilerow {
     margin-left:30px;   
     width:500px;
     height:110px;
+    margin-bottom:30px;
+}
+
+div#tilerow div:nth-child(5) {
+    margin-left:20px;
+}
+
+div#tilerow div:nth-child(5)::after {
+    position:absolute;
+    content:"Turn";
+    width:72px;
+    text-align:center;
+    bottom: -24px;
 }
 
 div.tile {
