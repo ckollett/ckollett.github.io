@@ -181,3 +181,24 @@ tr {
 tr.pasttotal {
     border-top:2px solid black;
 }
+
+span.minitile::after {
+    margin-right:5px;
+}
+
+
+span.minitile.campfire::after {
+    content:'C';
+}
+
+span.minitile.mug::after {
+    content:'M';
+}
+
+span.minitile.sleepingbag::after {
+    content:'S';
+}
+
+span.minitile.tent::after {
+    content:'T';
+}

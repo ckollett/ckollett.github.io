@@ -9,7 +9,7 @@ function displayAndScore(tiles) {
     displayTiles(tiles);
     if (tiles.length === 5) {
         let scoreParts = scoreHand(tiles);
-        let table = getOutputAsTable(scoreParts, true);
+        let table = getOutputAsTable(scoreParts, tiles, true);
         document.getElementById('output').innerHTML = table;
         
         let total = new TotalScore(scoreParts);
@@ -100,33 +100,42 @@ function createHash() {
 }
 
 /* ********** Output ********** */
-function getOutputAsTable(scoreParts, showFormula) {
+function getOutputAsTable(scoreParts, tiles, full) {
     let table = '<table id="pasttable">';
     
     table += '<tr class="pastheader"><td class="pastname">Name</td><td class="pastscore">Score</td>';
-    if (showFormula) {
+    if (full) {
         table += '<td class="pastformula">Formula</td>';
+        table += '<td class="scoringtiles">Tiles</td>';
     }
     table += '</tr>';
     
     for (let part of scoreParts) {
-        table += createTableRow(part, '', showFormula);
+        table += createTableRow(part, '', tiles, full);
     }
     
     if (scoreParts.length > 1) {
-        table += createTableRow(new TotalScore(scoreParts), "pasttotal", showFormula);
+        table += createTableRow(new TotalScore(scoreParts), "pasttotal", full);
     }
     
     return table + "</table>";
 }
 
-function createTableRow(scorePart, rowClass, showFormula) {
+function createTableRow(scorePart, rowClass, hand, full) {
     let row = '<tr class="' + (rowClass || "part") + '">';
     row += '<td class="pastname">' + scorePart.getName() + '</td>';
     row += '<td class="pastscore">' + scorePart.getScore() + '</td>';
-    if (showFormula) {
+    if (full) {
         row += '<td class="pastformula">' + scorePart.getFormula().replaceAll('*','&times') + '</td>';
+        let tiles = scorePart.getTiles(hand);
+        row += '<td class="scoringtiles">';
+        for (let tile of tiles) {
+            row += '<span class="minitile ' + tile.suit + '">' + tile.getStringValue() + '</span>';
+        }
+        row += '</td>';
     }
+    
+    
     return row + '</tr>';
 }
 
@@ -461,6 +470,10 @@ class Displayable {
     getScore() {
         return 0;
     }
+    
+    getTiles(hand) {
+        return [];
+    }
 }
 
 class Scorable extends Displayable {
@@ -532,6 +545,16 @@ class Tuple extends Scorable {
         // (count choose 2) * 2 = count * (count-1)
         return this.count * (this.count-1);
     }
+    
+    getTiles(hand) {
+        let tiles = [];
+        for (let tile of hand) {
+            if (tile.value == this.value) {
+                tiles.push(tile);
+            }
+        }
+        return tiles;
+    }
 }
 
 // A scoring group is just a run or a fifteen
@@ -575,6 +598,18 @@ class ScoringGroup extends Scorable {
         return this.values.length;
     }
     
+    getTiles(hand) {
+        let tiles = [];
+        let valuesSet = new Set();
+        this.values.forEach(v => valuesSet.add(v));
+        for (let tile of hand) {
+            if (valuesSet.has(tile.number)) {
+                tiles.push(tile);
+            }
+        }
+        return tiles;
+    }
+    
     equals(otherGroup) {
         return otherGroup.values === this.values && otherGroup.isRun === this.isRun;
     }
@@ -609,6 +644,10 @@ class TupledGroup extends Scorable {
     
     getTupleCount() {
         return this.scoringGroup.getTupleCount(this.tuple);
+    }
+    
+    getTiles(hand) {
+        return this.scoringGroup.getTiles(hand);
     }
     
     getScore() {
@@ -666,6 +705,9 @@ class CompoundTupledGroup extends Scorable {
         return score;
     }
     
+    getTiles(hand) {
+        return this.scoringGroup.getTiles(hand);
+    }
 }
 
 // A thing happens when there are multiple tupled groups
@@ -714,6 +756,15 @@ class Thing extends Scorable {
         score += this.tuple.getScore();
         return score;
     }
+    
+    getTiles(hand) {
+        let tilesSet = new Set();
+        for (let group of this.groups) {
+            let groupTiles = group.getTiles(hand);
+            groupTiles.forEach(t => tilesSet.add(t));
+        }
+        return Array.from(tilesSet);
+    }
 }
 
 class CompoundThing extends Scorable {
@@ -750,6 +801,11 @@ class CompoundThing extends Scorable {
         let score = 0;
         this.components.forEach(comp => score += comp.getScore());
         return score;
+    }
+    
+    getTiles(hand) {
+        // Is this right?
+        return this.components[0].getTiles(hand);
     }
 }
 
@@ -796,6 +852,11 @@ class PartialCompoundThing extends Scorable {
     getScore() {
         return this.thing.getScore() + this.tupledGroup.getScore();
     }
+    
+    getTiles(hand) {
+        // Is this right?
+        return this.thing.getTiles(hand);
+    }
 }
 
 class Flush extends Scorable {
@@ -824,6 +885,10 @@ class Flush extends Scorable {
     
     getOutsideParens() {
         return [];
+    }
+    
+    getTiles(hand) {
+        return hand.filter(tile => tile.suit == this.suit);
     }
 }
 
@@ -854,6 +919,10 @@ class ScoringJack extends Scorable {
     getOutsideParens() {
         return [];
     }    
+    
+    getTiles(hand) {
+        return [new CounterTile('J', this.suit)];
+    }
 }
 
 class WrongJacks extends Displayable {
@@ -869,11 +938,23 @@ class WrongJacks extends Displayable {
             return "" + this.numWrongJacks + " Wrong Jacks";
         }
     }
+    
+    getTiles(hand) {
+        let handOnly = hand.slice();
+        handOnly.pop();
+        return handOnly.filter(tile => tile.value == 'J');
+    }
 }
 
 class SuitDiversity extends Displayable {
     getName() {
         return "Suit Diversity";
+    }
+    
+    getTiles(hand) {
+        let handOnly = hand.slice();
+        handOnly.pop();
+        return handOnly;
     }
 }
 
@@ -889,6 +970,11 @@ class TotalScore extends Displayable {
     
     getScore() {
         return this.scoreParts.reduce((accum, current) => accum + current.getScore(), 0);
+    }
+    
+    getTiles(hand) {
+        // Should this return the entire hand? Nothing? Just the tiles that contribute to scoring?
+        return [];
     }
 }
 
