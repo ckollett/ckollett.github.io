@@ -181,3 +181,48 @@ tr {
 tr.pasttotal {
     border-top:2px solid black;
 }
+
+div.outscontainer {
+    width:40%;
+}
+
+table.outs {
+    table-layout:fixed;
+    width:100%;
+}
+
+table.outs td,th {
+    width:30px;
+    text-align: center;
+}
+
+div.outs_summary {
+    display:flex;
+    justify-content: space-between;
+}
+
+table.outs th {
+    background-size: 75%;
+    background-position: 50% 50%;    
+    background-repeat: no-repeat;
+}
+
+th.mug {
+    background-image:url(images/mug.svg);
+    height:40px;
+}
+
+th.tent {
+    background-image:url(images/tent.svg);
+    height:40px;
+}
+    
+th.sleepingbag {
+    background-image:url(images/sleepingbag.svg);
+    height:40px;
+}
+
+th.campfire {
+    background-image:url(images/campfire.svg);
+    height:40px;
+}

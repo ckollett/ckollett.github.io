@@ -14,6 +14,10 @@ function displayAndScore(tiles) {
         
         let total = new TotalScore(scoreParts);
         return total.getScore();
+    } else if (tiles.length === 4) {
+        const outs = getOutsHtml(tiles);
+        document.getElementById('output').innerHTML = outs;
+        return 0;
     } else {
         document.getElementById('output').innerHTML = '';
         return 0;
@@ -256,6 +260,9 @@ function scoreValues(values) {
     // since all of the minus-a-pair situations from things are resolved.
     scores.afterMerge = count(allComponents);
     scores.afterMergeFormula = countByFormula(allComponents);
+    
+    // Find wrong Jacks among the tuples.
+    
     
     allComponents = allComponents.filter(item => !item.consumed);
     
