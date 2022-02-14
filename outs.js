@@ -22,7 +22,7 @@ class Outs {
                 }
             }
         }   
-        this.values = Array.from(this.outs.values()).sort();
+        this.values = Array.from(this.outs.values()).sort((a,b) => a-b);
     }
     
     hasTile(tile) {
