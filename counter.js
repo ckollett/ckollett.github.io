@@ -6,9 +6,16 @@ function selectFromHash() {
 }
 
 function displayAndScore(tiles) {
+    let isCrib = document.getElementById('cribtoggle').checked;
+    
+    if (isCrib) {
+        tiles[0].isDealerTile = true;
+        tiles[1].isDealerTile = true;
+    }
+    
     displayTiles(tiles);
     if (tiles.length === 5) {
-        let scoreParts = scoreHand(tiles);
+        let scoreParts = scoreHand(tiles, isCrib);
         let table = getOutputAsTable(scoreParts, true);
         document.getElementById('output').innerHTML = table;
         
@@ -204,7 +211,7 @@ function getTotal(scoreParts) {
     return total;
 }
 
-function scoreHand(tiles) {
+function scoreHand(tiles, isCrib) {
     if (typeof(tiles) === 'string') tiles = getHandFromShortHand(tiles);
     
     let scores = scoreValues(tiles.map(tile => tile.number));
@@ -215,19 +222,50 @@ function scoreHand(tiles) {
     let nobs = findNobs(tiles);
     if (nobs) {
         scores.push(nobs);
-    } else {
-        wrongJacks = findWrongJacks(tiles);
-        if (wrongJacks) {
-            scores.push(wrongJacks);
+    } 
+    
+    findAlternateScoreNames(scores, tiles, isCrib);
+    findNonScoringRows(scores, tiles, isCrib);
+    
+    scores.sort((a,b) => b.priority - a.priority);
+    return scores;
+}
+
+function findAlternateScoreNames(scores, tiles, isCrib) {
+    // Special names when the only scoring is a single pair.
+    if (scores.length === 1) {
+        let score = scores[0];
+        if (score.constructor.name === 'Tuple' && score.count === 2) {
+            // Get the pair from the hand. Need to use == instead of === here for
+            // reasons I don't understand.
+            let pair = tiles.filter(a => a.value == score.value);
+            scores[0] = new CustomNameScorable(getSinglePairName(pair, isCrib), 2);
         }
     }
+    
+}
+
+function getSinglePairName(pair, isCrib) {
+    if (isCrib) {
+        if (pair[0].isDealerTile && pair[1].isDealerTile) {
+            return 'Album Title';
+        } else if (!pair[0].isDealerTile && pair[1].isDealerTile) {
+            return 'B-Side';
+        }
+    }
+    return 'Like a Nanny?';
+}
+
+function findNonScoringRows(scores, tiles, isCrib) {
+    wrongJacks = findWrongJacks(tiles);
+    if (wrongJacks) {
+        scores.push(wrongJacks);
+    }
+
     let sd = findSuitDiversity(tiles);
     if (sd) {
         scores.push(sd);
     }
-    
-    scores.sort((a,b) => b.priority - a.priority);
-    return scores;
 }
 
 function scoreValues(values) {
@@ -260,9 +298,6 @@ function scoreValues(values) {
     // since all of the minus-a-pair situations from things are resolved.
     scores.afterMerge = count(allComponents);
     scores.afterMergeFormula = countByFormula(allComponents);
-    
-    // Find wrong Jacks among the tuples.
-    
     
     allComponents = allComponents.filter(item => !item.consumed);
     
@@ -438,9 +473,14 @@ function findNobs(hand) {
 
 function findWrongJacks(hand) {
     let handOnly = hand.slice();
-    handOnly.pop();
-    let numJacks = handOnly.filter(a => a.value === 'J').length;
-    return numJacks > 1 ? new WrongJacks(numJacks) : null;
+    let turn = handOnly.pop();
+    if (turn.value === 'J') {
+        // No wrong Jacks when the turn is a Jack
+        return null;
+    }
+    let jacks = handOnly.filter(a => a.value === 'J');
+    let matchingJack = jacks.filter(a => a.suit === turn.suit);
+    return (matchingJack.length === 0 && jacks.length > 1) ? new WrongJacks(jacks.length) : null;
 }
 
 function findSuitDiversity(hand) {
@@ -538,6 +578,22 @@ class Tuple extends Scorable {
     getScore() {
         // (count choose 2) * 2 = count * (count-1)
         return this.count * (this.count-1);
+    }
+}
+
+class CustomNameScorable extends Displayable {
+    constructor(name, score) {
+        super();
+        this.name = name;
+        this.score = score;
+    }
+    
+    getName() {
+        return this.name;
+    }
+    
+    getScore() {
+        return this.score;
     }
 }
 
