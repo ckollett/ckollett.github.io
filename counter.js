@@ -24,6 +24,7 @@ function displayAndScore(tiles) {
     } else if (tiles.length === 4) {
         const outs = getOutsHtml(tiles);
         document.getElementById('output').innerHTML = outs;
+        createOutsChart(tiles);
         return 0;
     } else {
         document.getElementById('output').innerHTML = '';

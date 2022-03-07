@@ -83,6 +83,15 @@ class Outs {
         const scoreParts = scoreHand(this.tiles);
         return new TotalScore(scoreParts).getScore();
     }
+    
+    getCounts() {
+        const min = this.getMin();
+        const counts = new Array(this.getMax()-min+1);
+        counts.fill(0);
+        
+        this.values.forEach(value => counts[value-min]++);
+        return counts;
+    }
 }
 
 function getOutsHtml(tiles) {
@@ -95,6 +104,39 @@ function getOutsHtml(tiles) {
     html += '<div>Average: ' + outs.getAverage().toFixed(2) + '</div>';
     html += '</div></div>';
     return html;
+}
+
+function createOutsChart(tiles) {
+    const plotElt = document.getElementById('plot');
+    plotElt.innerHTML = '';
     
+    const outs = new Outs(tiles);
+    const counts = outs.getCounts();
+    const min = outs.getMin();
+    total = 48;
+    for (let i = 0; i < counts.length; i++) {
+        plotElt.appendChild(createColumn(i+min, counts[i], total));
+        total -= counts[i];
+    }
+}
+
+function createColumn(label, count, total) {
+    const pct = 100 * count / 48;
+    const columnElt = document.createElement('div');
+    columnElt.classList.add('column');
+    const totalElt = document.createElement('div');
+    totalElt.classList.add('totalbar');
+    totalElt.style.height = '' + (100 * total / 48) + '%';
+    columnElt.appendChild(totalElt);
+
+    const barElt = document.createElement('div');
+    barElt.classList.add('bar')
+    barElt.style.height = '' + pct + '%';
+    columnElt.appendChild(barElt);
     
+    const labelElt = document.createElement('div');
+    labelElt.classList.add('label');
+    labelElt.innerHTML = label;
+    columnElt.appendChild(labelElt);
+    return columnElt;
 }
