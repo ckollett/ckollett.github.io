@@ -16,7 +16,7 @@ function displayAndScore(tiles) {
     displayTiles(tiles);
     if (tiles.length === 5) {
         let scoreParts = scoreHand(tiles, isCrib);
-        let table = getOutputAsTable(scoreParts, true);
+        let table = getOutputAsTable(scoreParts, true, tiles);
         document.getElementById('output').innerHTML = table;
         
         let total = new TotalScore(scoreParts);
@@ -111,7 +111,7 @@ function createHash() {
 }
 
 /* ********** Output ********** */
-function getOutputAsTable(scoreParts, showFormula) {
+function getOutputAsTable(scoreParts, showFormula, hand) {
     let table = '<table id="pasttable">';
     
     table += '<tr class="pastheader"><td class="pastname">Name</td><td class="pastscore">Score</td>';
@@ -128,6 +128,12 @@ function getOutputAsTable(scoreParts, showFormula) {
         table += createTableRow(new TotalScore(scoreParts), "pasttotal", showFormula);
     }
     
+    if (hand && hand.length === 5) {
+        const outParts = scoreHand(hand.slice(0,4));
+        const out = getTotal(scoreParts) - getTotal(outParts);
+        table += createTableRow(new OutScore(out), '', false);
+    }
+        
     return table + "</table>";
 }
 
@@ -943,7 +949,7 @@ class SuitDiversity extends Displayable {
 class TotalScore extends Displayable {
     constructor(scoreParts) {
         super();
-        this.scoreParts = scoreParts;
+        this.total = getTotal(scoreParts);
     }
     
     getName() {
@@ -951,7 +957,22 @@ class TotalScore extends Displayable {
     }
     
     getScore() {
-        return this.scoreParts.reduce((accum, current) => accum + current.getScore(), 0);
+        return this.total;
+    }
+}
+
+class OutScore extends Displayable {
+    constructor(out) {
+        super();
+        this.out = out;
+    }
+    
+    getName() {
+        return "Out";
+    }
+    
+    getScore() {
+        return this.out;
     }
 }
 
