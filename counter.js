@@ -129,9 +129,17 @@ function getOutputAsTable(scoreParts, showFormula, hand) {
     }
     
     if (hand && hand.length === 5) {
-        const outParts = scoreHand(hand.slice(0,4));
-        const out = getTotal(scoreParts) - getTotal(outParts);
-        table += createTableRow(new OutScore(out), '', false);
+        const outs = new Outs(hand.slice(0,4));
+        const out = outs.getBaseScore();
+        const aboveMin = out - outs.getMin();
+        const belowMax = outs.getMax() - out;
+        const fromMean = out - outs.getAverage();
+        const fromMedian = out - outs.getMedian();
+        table += createTableRow(new OutScore(out, 'Out'), '', false);
+        table += createTableRow(new OutScore(aboveMin, '  Above Min'), '', false);
+        table += createTableRow(new OutScore(belowMax, '  Below Max'), '', false);
+        table += createTableRow(new OutScore(fromMean, '  From Average'), '', false);
+        table += createTableRow(new OutScore(fromMedian, '  From Median'), '', false);
     }
         
     return table + "</table>";
@@ -967,17 +975,18 @@ class TotalScore extends Displayable {
 }
 
 class OutScore extends Displayable {
-    constructor(out) {
+    constructor(out, name) {
         super();
         this.out = out;
+        this.name = name;
     }
     
     getName() {
-        return "Out";
+        return this.name;
     }
     
     getScore() {
-        return this.out;
+        return Math.round(this.out * 100)/100;
     }
 }
 
