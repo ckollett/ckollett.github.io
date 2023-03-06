@@ -130,8 +130,8 @@ function getOutputAsTable(scoreParts, showFormula, hand) {
     
     if (hand && hand.length === 5) {
         const outs = new Outs(hand.slice(0,4));
-        const out = outs.getBaseScore();
         const actual = getTotal(scoreParts);
+        const out = actual - outs.getBaseScore();
         const aboveMin = actual - outs.getMin();
         const belowMax = outs.getMax() - actual;
         const fromMean = actual - outs.getAverage();
