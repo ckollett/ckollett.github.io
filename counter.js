@@ -225,10 +225,13 @@ function scoreHand(tiles, isCrib) {
     if (flush) {
         scores.push(flush);
     }
-    let nobs = findNobs(tiles);
-    if (nobs) {
-        scores.push(nobs);
-    } 
+    
+    if (tiles.length === 5) {
+        let nobs = findNobs(tiles);
+        if (nobs) {
+            scores.push(nobs);
+        } 
+    }
     
     findAlternateScoreNames(scores, tiles, isCrib);
     findNonScoringRows(scores, tiles, isCrib);
@@ -263,9 +266,11 @@ function getSinglePairName(pair, isCrib) {
 }
 
 function findNonScoringRows(scores, tiles, isCrib) {
-    wrongJacks = findWrongJacks(tiles);
-    if (wrongJacks) {
-        scores.push(wrongJacks);
+    if (tiles.length === 5) {
+        wrongJacks = findWrongJacks(tiles);
+        if (wrongJacks) {
+            scores.push(wrongJacks);
+        }
     }
 
     let sd = findSuitDiversity(tiles);
