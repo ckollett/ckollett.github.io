@@ -131,10 +131,12 @@ function getOutputAsTable(scoreParts, showFormula, hand) {
     if (hand && hand.length === 5) {
         const outs = new Outs(hand.slice(0,4));
         const out = outs.getBaseScore();
-        const aboveMin = out - outs.getMin();
-        const belowMax = outs.getMax() - out;
-        const fromMean = out - outs.getAverage();
-        const fromMedian = out - outs.getMedian();
+        const actual = getTotal(scoreParts);
+        const aboveMin = actual - outs.getMin();
+        const belowMax = outs.getMax() - actual;
+        const fromMean = actual - outs.getAverage();
+        const fromMedian = actual - outs.getMedian();
+        
         table += createTableRow(new OutScore(out, 'Out'), '', false);
         table += createTableRow(new OutScore(aboveMin, '  Above Min'), '', false);
         table += createTableRow(new OutScore(belowMax, '  Below Max'), '', false);
