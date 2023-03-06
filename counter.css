@@ -186,6 +186,18 @@ tr.pasttotal {
     border-top:2px solid black;
 }
 
+tr.outtotal {
+    border-top:2px solid black;
+}
+
+tr.outdetail {
+    font-size: smaller;
+}
+
+tr.outdetail td.pastname {
+    padding-left: 10px;
+}
+
 div.outscontainer {
     width:40%;
 }
