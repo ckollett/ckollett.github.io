@@ -225,6 +225,14 @@ table.outs th {
     background-repeat: no-repeat;
 }
 
+table.probs td,th {
+    padding-right:10px;
+}
+
+div.probscontainer {
+    margin-top:15px;
+}
+
 th.mug {
     background-image:url(images/mug.svg);
     height:40px;

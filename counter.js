@@ -14,18 +14,36 @@ function displayAndScore(tiles) {
     }
     
     displayTiles(tiles);
-    if (tiles.length === 5) {
+    switch (tiles.length) {
+    case 4:
+        const outs = new Outs(tiles);
+        const outsTable = outs.getOutsHtml();
+        const probsTable = outs.getProbabilitiesHtml();
+        
+        const outsDiv = document.createElement('div');
+        outsDiv.classList.add('outputpart');
+        outsDiv.innerHTML = outsTable;
+        
+        const probsDiv = document.createElement('div');
+        probsDiv.classList.add('outputpart');
+        probsDiv.innerHTML = probsTable;
+        
+        const outputDiv = document.getElementById('output');
+        outputDiv.innerHTML = '';
+        outputDiv.appendChild(outsDiv);
+        outputDiv.appendChild(probsDiv);
+        return 0;
+    case 5:
         let scoreParts = scoreHand(tiles, isCrib);
         let table = getOutputAsTable(scoreParts, true, tiles);
         document.getElementById('output').innerHTML = table;
         
         let total = new TotalScore(scoreParts);
         return total.getScore();
-    } else if (tiles.length === 4) {
-        const outs = getOutsHtml(tiles);
-        document.getElementById('output').innerHTML = outs;
+    case 6:
+        analyzeDealtHand(tiles);
         return 0;
-    } else {
+    default:
         document.getElementById('output').innerHTML = '';
         return 0;
     }
@@ -80,13 +98,27 @@ function createTileElt(tile) {
     valueElt.classList.add('value');
     valueElt.innerHTML = tile.getStringValue();
     newTile.appendChild(valueElt);
+    newTile.id = 'tile' + tile.getId(); 
+    newTile.addEventListener('click', function(evt) {
+        const clickedId = evt.target.id;
+        toggleSelection(clickedId.substring(4));
+    });
     return newTile;
 }
 
 /* ********** Handle Selection ********** */
 function toggleSelection(elt) {
+    if (typeof(elt) === 'string') {
+        elt = document.getElementById(elt);
+    }
+    
+    if (!elt) {
+        console.log("No select element found.")
+        return;
+    }
+
     let selection = splitShortHand(document.location.hash);
-    if (selection.length >= 5 && !elt.classList.contains('selected')) {
+    if (selection.length >= 6 && !elt.classList.contains('selected')) {
         return;
     }
     
@@ -1113,4 +1145,26 @@ function isPeggingRun(values) {
         max = Math.max(max, value);
     }
     return valueSet.size === values.length && max-min === values.length-1;
+}
+
+function analyzeDealtHand(tiles) {
+    let best = -1;
+    let bestHand = null;
+    for (let i = 0; i < 5; i++) {
+        for (let j = i+1; j < 6; j++) {
+            let afterThrow = tiles.slice();
+            // Remove the second tile first, so the
+            // index for the second tile doesn't shift!
+            afterThrow.splice(j,1);
+            afterThrow.splice(i,1);
+            let meanOut = new Outs(afterThrow).getAverage();
+            if (meanOut > best) {
+                best = meanOut;
+                bestHand = afterThrow;
+            }
+        }
+    }
+    
+    console.log("Best Hand (" + best + ")");
+    console.log(bestHand);
 }

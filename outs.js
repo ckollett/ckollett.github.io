@@ -23,6 +23,7 @@ class Outs {
             }
         }   
         this.values = Array.from(this.outs.values()).sort((a,b) => a-b);
+        console.log(this.getProbabilities());
     }
     
     hasTile(tile) {
@@ -79,22 +80,52 @@ class Outs {
         return Math.min(...this.values);
     }
     
+    getProbabilities() {
+        let groups = Map.groupBy(this.values, (value) => value);
+        const probs = [];
+        groups.forEach(function(scores, value) {
+            let prob = {
+                "score" : value,
+                "numOuts" : scores.length
+            }
+            probs.push(prob);
+        });
+        return probs;
+    }
+    
     getBaseScore() {
         const scoreParts = scoreHand(this.tiles);
         return new TotalScore(scoreParts).getScore();
     }
-}
-
-function getOutsHtml(tiles) {
-    const outs = new Outs(tiles);
-    let html = '<div class="outscontainer">' + outs.toTable();
-    html += '<div class="outs_summary">';
-    html += '<div>Min: ' + outs.getMin() + '</div>';
-    html += '<div>Max: ' + outs.getMax() + '</div>';
-    html += '<div>Median: ' + outs.getMedian() + '</div>';
-    html += '<div>Average: ' + outs.getAverage().toFixed(2) + '</div>';
-    html += '</div></div>';
-    return html;
     
+    getOutsHtml() {
+        const outs = this;
+        let html = '<div class="outscontainer">' + outs.toTable();
+        html += '<div class="outs_summary">';
+        html += '<div>Min: ' + outs.getMin() + '</div>';
+        html += '<div>Max: ' + outs.getMax() + '</div>';
+        html += '<div>Median: ' + outs.getMedian() + '</div>';
+        html += '<div>Average: ' + outs.getAverage().toFixed(2) + '</div>';
+        html += '</div></div>';
+        return html;
+    }
     
+    getProbabilitiesHtml() {
+        const outs = this;
+        const probs = outs.getProbabilities();
+        probs.sort((a,b) => b.numOuts - a.numOuts);
+        
+        let html = '<div class="probscontainer">';
+        html += '<table class="probs">';
+        html += '<tr><th>Score</th><th>Probability</th></tr>';
+        probs.forEach(function(prob) {
+            html += '<tr><td>' + prob.score + '</td>';
+            let pct = prob.numOuts / 48;
+            let pctStr = (pct * 100).toFixed(2) + '%';
+            html += '<td>' + pctStr + '</td></tr>'; 
+        });
+        html += '</table>';
+        return html;
+        
+    }
 }
