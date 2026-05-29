@@ -252,3 +252,13 @@ th.campfire {
     background-image:url(images/campfire.svg);
     height:40px;
 }
+
+tr.probrow.selected td {
+    background-color:black;
+    color:white;
+}
+
+td.out.selected {
+    background-color:black;
+    color:white;
+}

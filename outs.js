@@ -48,7 +48,8 @@ class Outs {
             for (let i = 1; i <= 13; i++) {
                 const id = suit[0] + CounterTile.toStringValue(i);
                 if (this.outs.has(id)) {
-                    rows[j] += '<td>' + this.outs.get(id) + '</td>';
+                    const out = this.outs.get(id);
+                    rows[j] += '<td class="out out' + out + '">' + out + '</td>';
                 } else {
                     rows[j] += '<td>-</td>';
                 }
@@ -119,13 +120,36 @@ class Outs {
         html += '<table class="probs">';
         html += '<tr><th>Score</th><th>Probability</th></tr>';
         probs.forEach(function(prob) {
-            html += '<tr><td>' + prob.score + '</td>';
+            html += '<tr class="probrow" onclick="toggleProbabilitySelection(this);"><td>' + prob.score + '</td>';
             let pct = prob.numOuts / 48;
             let pctStr = (pct * 100).toFixed(2) + '%';
             html += '<td>' + pctStr + '</td></tr>'; 
         });
         html += '</table>';
         return html;
+        
+    }
+}
+
+
+function toggleProbabilitySelection(probRow) {
+    const selectedOuts = document.querySelectorAll(".out.selected");
+    selectedOuts.forEach(outCell => outCell.classList.remove("selected"));
+
+    if (probRow.classList.contains("selected")) {
+        probRow.classList.remove("selected");
+    } else {
+        // Clear all other selections first.
+        const selection = document.querySelector(".probrow.selected");
+        if (selection) {
+            selection.classList.remove("selected");
+        }
+        probRow.classList.add("selected");
+        const scoreCell = probRow.getElementsByTagName("td")[0];
+        const score = scoreCell.innerHTML;
+        
+        const outCells = document.querySelectorAll(".out" + score);
+        outCells.forEach(outCell => outCell.classList.add("selected"));
         
     }
 }
