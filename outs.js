@@ -118,9 +118,10 @@ class Outs {
         
         let html = '<div class="probscontainer">';
         html += '<table class="probs">';
-        html += '<tr><th>Score</th><th>Probability</th></tr>';
+        html += '<tr><th>Score</th><th>#</th><th>%</th></tr>';
         probs.forEach(function(prob) {
             html += '<tr class="probrow" onclick="toggleProbabilitySelection(this);"><td>' + prob.score + '</td>';
+            html += '<td>' + prob.numOuts + '</td>';
             let pct = prob.numOuts / 48;
             let pctStr = (pct * 100).toFixed(2) + '%';
             html += '<td>' + pctStr + '</td></tr>'; 

@@ -185,6 +185,8 @@ function createTableRow(scorePart, rowClass, showFormula) {
     row += '<td class="pastscore">' + scorePart.getScore() + '</td>';
     if (showFormula) {
         row += '<td class="pastformula">' + scorePart.getFormula().replaceAll('*','&times') + '</td>';
+    } else {
+        row += '<td class="pastformula"></td>';
     }
     return row + '</tr>';
 }
